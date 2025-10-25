@@ -86,7 +86,7 @@ INSERT INTO Ticket
    card_type, card_num, card_name, exp_date, purchase_datetime)
 VALUES ('B61234', '2025-11-10 09:00:00', 'A321-JB1', 'Jet Blue', 'as18181@nyu.edu', 'credit', '4111111111111111', 'Aman Sunesh', '2029-12-31', '2025-10-26 10:00:00'),
        ('EK202',  '2025-12-05 22:30:00', 'A380-EK1', 'Emirates', 'as18181@nyu.edu', 'debit',  '5105105105105100', 'Aman Sunesh', '2030-03-31', '2025-10-27 09:00:00'),
-       ('BA676',  '2025-12-25 20:15:00', 'A350-BA1', 'British Airways', 'ad6647@nyu.edu', 'debit',  '7165706165206100', 'Anish Deshpande', '2030-06-10', '2025-9-25 12:00:00'),
+       ('BA676',  '2025-12-25 20:15:00', 'A350-BA1', 'British Airways', 'ad6647@nyu.edu', 'debit',  '7165706165206100', 'Anish Deshpande', '2030-06-10', '2025-09-25 12:00:00'),
        ('B61220', '2025-10-10 07:00:00', 'E190-JB1', 'Jet Blue', 'noah.patel@gmail.com', 'credit', '4111111111111113', 'Noah Patel', '2031-09-30', '2025-09-20 12:00:00'),
        ('UA089',  '2025-12-03 12:00:00', 'B738-UA1', 'United Airlines', 'alice.lee@gmail.com', 'credit', '6011000990139424', 'Alice Lee', '2029-11-30', '2025-10-28 16:05:00'),
        ('B61235', '2025-11-15 13:30:00', 'A320-JB2', 'Jet Blue', 'bob.chen@gmail.com', 'credit', '4000000000000002', 'Bob Chen', '2027-05-31', '2025-10-29 14:15:00'),
