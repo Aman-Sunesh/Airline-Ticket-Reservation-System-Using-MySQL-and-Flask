@@ -98,8 +98,6 @@ CREATE TABLE Customer(
   passport_country VARCHAR(60) NOT NULL,
   date_of_birth DATE NOT NULL,
   CONSTRAINT chk_passport_date_order CHECK (passport_expiration > date_of_birth),
-  CONSTRAINT chk_dob CHECK (date_of_birth <= CURDATE()),
-  CONSTRAINT chk_passport_not_expired CHECK (passport_expiration > CURRENT_DATE),
   PRIMARY KEY (email),
   UNIQUE KEY uq_passport (passport_country, passport_number)
 );
