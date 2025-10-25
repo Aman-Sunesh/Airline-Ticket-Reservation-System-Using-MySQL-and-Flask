@@ -48,35 +48,47 @@ INSERT INTO StaffPhoneNo VALUES ('h.alhammadi', '+971-2-555-0707');
 
 
 -- Flight
+INSERT INTO Flight VALUES ('B61220', '2025-10-10 07:00:00', 'E190-JB1',  'Jet Blue', 'JFK', 'PVG', '2025-10-11 00:10:00', 'delayed', 650.00);
+INSERT INTO Flight VALUES ('EK303',  '2025-10-15 23:15:00', 'B77W-EK2',  'Emirates', 'DXB', 'JFK', '2025-10-16 07:30:00', 'on-time', 920.00);
 INSERT INTO Flight VALUES ('B61234', '2025-11-10 09:00:00', 'A321-JB1', 'Jet Blue', 'JFK', 'PVG', '2025-11-11 01:10:00', 'on-time', 750.00);
 INSERT INTO Flight VALUES ('B61235', '2025-11-15 13:30:00', 'A320-JB2', 'Jet Blue', 'PVG', 'JFK', '2025-11-15 20:10:00', 'delayed', 730.00);
 INSERT INTO Flight VALUES ('EY101',  '2025-11-20 02:00:00', 'B789-EY2', 'Etihad Airways', 'AUH', 'JFK', '2025-11-20 09:30:00', 'delayed', 820.00);
 INSERT INTO Flight VALUES ('EK202',  '2025-12-05 22:30:00', 'A380-EK1', 'Emirates', 'DXB', 'SYD', '2025-12-06 17:30:00', 'on-time', 980.00);
 INSERT INTO Flight VALUES ('UA089',  '2025-12-03 12:00:00', 'B738-UA1', 'United Airlines', 'JFK', 'PVG', '2025-12-04 16:00:00', 'on-time', 765.00);
 INSERT INTO Flight VALUES ('AA100',  '2025-11-25 18:00:00', 'A321-AA1', 'American Airlines','JFK','DXB', '2025-11-26 15:00:00', 'on-time', 840.00);
+INSERT INTO Flight VALUES ('EY202',  '2025-12-10 01:30:00', 'A380-EY1',  'Etihad Airways',  'AUH', 'SYD', '2025-12-10 18:45:00', 'on-time', 995.00);
+INSERT INTO Flight VALUES ('UA123',  '2025-11-28 10:00:00', 'B738-UA1',  'United Airlines', 'PVG', 'JFK', '2025-11-28 23:40:00', 'on-time', 770.00);
+
 
 
 -- Customer
 INSERT INTO Customer VALUES ('as18181@nyu.edu', 'Aman Sunesh', MD5('pw-aman'), '1', 'Saadiyat St', 'Abu Dhabi', 'AD', '+971-50-000-0001', 'IN9A12345', '2030-05-31', 'India', '2005-04-17');
 INSERT INTO Customer VALUES ('alice.lee@gmail.com', 'Alice Lee', MD5('pw-alice'), '100', 'Main St', 'New York', 'NY', '+1-212-555-0103', 'USL777777', '2029-12-31', 'USA', '1999-04-12');
+INSERT INTO Customer VALUES ('noah.patel@gmail.com', 'Noah Patel', MD5('pw-noah'), '221', 'Park Ave', 'New York', 'NY', '+1-917-555-0155', 'IN8B98765', '2031-07-31', 'India', '1997-02-14');
 INSERT INTO Customer VALUES ('bob.chen@gmail.com', 'Bob Chen', MD5('pw-bob'), '55', 'Broadway', 'New York', 'NY', '+1-212-555-0104','CN88AB234', '2032-01-31', 'China', '1998-11-03');
 INSERT INTO Customer VALUES ('maria.garcia@yahoo.com', 'Maria Garcia', MD5('pw-maria'), '12', 'Queens Blvd', 'New York', 'NY', '+1-929-555-0111', 'ESZ123456', '2031-09-30', 'Spain', '1997-08-21');
+INSERT INTO Customer VALUES ('sofia.rodriguez@gmail.com','Sofia Rodriguez', MD5('pw-sofia'),'18', 'Gran Via', 'Madrid', 'MD', '+34-91-555-0303', 'ESY890123', '2033-02-28', 'Spain', '1995-09-05');
 INSERT INTO Customer VALUES ('li.wei@outlook.com', 'Li Wei', MD5('pw-liwei'),'88', 'Century Ave', 'Shanghai', 'SH', '+86-21-555-0202', 'CN99XZ321', '2030-04-30', 'China', '1996-05-11');
 INSERT INTO Customer VALUES ('fatima.tamimi@outlook.com', 'Fatima Al Tamimi', MD5('pw-fatima'), '7', 'Corniche Rd', 'Abu Dhabi', 'AD', '+971-50-000-0023', 'AE12345PQ', '2032-06-30', 'UAE', '1998-02-10');
+INSERT INTO Customer VALUES ('ahmed.khan@gmail.com', 'Ahmed Khan', MD5('pw-ahmed'), '9', 'Ittihad St', 'Abu Dhabi', 'AD', '+971-50-000-0042','PKP556677', '2031-10-31', 'UAE', '1994-12-01');
 
-
+   
 -- Ticket
 INSERT INTO Ticket
    (flight_no, dep_datetime, airplane_id, airline_name, customer_email,
    card_type, card_num, card_name, exp_date, purchase_datetime)
 VALUES ('B61234', '2025-11-10 09:00:00', 'A321-JB1', 'Jet Blue', 'as18181@nyu.edu', 'credit', '4111111111111111', 'Aman Sunesh', '2029-12-31', '2025-10-26 10:00:00'),
        ('EK202',  '2025-12-05 22:30:00', 'A380-EK1', 'Emirates', 'as18181@nyu.edu', 'debit',  '5105105105105100', 'Aman Sunesh', '2030-03-31', '2025-10-27 09:00:00'),
+       ('B61220', '2025-10-10 07:00:00', 'E190-JB1', 'Jet Blue', 'noah.patel@gmail.com', 'credit', '4111111111111113', 'Noah Patel', '2031-09-30', '2025-09-20 12:00:00'),
        ('UA089',  '2025-12-03 12:00:00', 'B738-UA1', 'United Airlines', 'alice.lee@gmail.com', 'credit', '6011000990139424', 'Alice Lee', '2029-11-30', '2025-10-28 16:05:00'),
        ('B61235', '2025-11-15 13:30:00', 'A320-JB2', 'Jet Blue', 'bob.chen@gmail.com', 'credit', '4000000000000002', 'Bob Chen', '2027-05-31', '2025-10-29 14:15:00'),
+       ('EK303',  '2025-10-15 23:15:00', 'B77W-EK2', 'Emirates', 'sofia.rodriguez@gmail.com', 'credit', '4000000000000009', 'Sofia Rodriguez',  '2029-05-31', '2025-09-25 10:05:00'),
        ('AA100',  '2025-11-25 18:00:00', 'A321-AA1', 'American Airlines', 'bob.chen@gmail.com', 'debit',  '3530111333300000', 'Bob Chen', '2028-01-31', '2025-10-31 12:20:00'),
        ('EY101',  '2025-11-20 02:00:00', 'B789-EY2', 'Etihad Airways', 'maria.garcia@yahoo.com', 'credit', '5200828282828210', 'Maria Garcia', '2031-09-30', '2025-10-30 09:00:00'),
+       ('EY202',  '2025-12-10 01:30:00', 'A380-EY1', 'Etihad Airways', 'ahmed.khan@gmail.com', 'debit',  '5105105105105106', 'Ahmed Khan', '2032-10-31', '2025-11-01 14:00:00'),
        ('EK202',  '2025-12-05 22:30:00', 'A380-EK1', 'Emirates', 'li.wei@outlook.com', 'credit', '4007000000027', 'Li Wei', '2030-04-30', '2025-10-31 11:30:00'),
-       ('AA100',  '2025-11-25 18:00:00', 'A321-AA1', 'American Airlines', 'fatima.tamimi@outlook.com', 'debit',  '3566002020360505', 'Fatima Al Tamimi', '2032-06-30', '2025-10-27 13:40:00');
+       ('AA100',  '2025-11-25 18:00:00', 'A321-AA1', 'American Airlines', 'fatima.tamimi@outlook.com', 'debit',  '3566002020360505', 'Fatima Al Tamimi', '2032-06-30', '2025-10-27 13:40:00'),
+       ('UA123',  '2025-11-28 10:00:00', 'B738-UA1', 'United Airlines', 'li.wei@outlook.com', 'credit', '6011111111111117', 'Li Wei', '2030-06-30', '2025-11-05 09:30:00');
 
 
 -- FlightRating
