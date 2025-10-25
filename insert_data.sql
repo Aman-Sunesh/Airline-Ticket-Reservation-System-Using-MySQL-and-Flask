@@ -76,7 +76,7 @@ INSERT INTO Customer VALUES ('sofia.rodriguez@gmail.com','Sofia Rodriguez', MD5(
 INSERT INTO Customer VALUES ('li.wei@outlook.com', 'Li Wei', MD5('pw-liwei'),'88', 'Century Ave', 'Shanghai', 'SH', '+86-21-555-0202', 'CN99XZ321', '2030-04-30', 'China', '1996-05-11');
 INSERT INTO Customer VALUES ('fatima.tamimi@outlook.com', 'Fatima Al Tamimi', MD5('pw-fatima'), '7', 'Corniche Rd', 'Abu Dhabi', 'AD', '+971-50-000-0023', 'AE12345PQ', '2032-06-30', 'UAE', '1998-02-10');
 INSERT INTO Customer VALUES ('ahmed.khan@gmail.com', 'Ahmed Khan', MD5('pw-ahmed'), '9', 'Ittihad St', 'Abu Dhabi', 'AD', '+971-50-000-0042','PKP556677', '2031-10-31', 'UAE', '1994-12-01');
-INSERT INTO Customer VALUES ('ad6647@nyu.edu', 'Anish Deshpande', MD5('pw-anish'), '101', 'Johnson St', 'Brooklyn', 'NY', '+1-978-995-3171', 'USL758367', '2029-02-31', 'USA', '2005-02-17');
+INSERT INTO Customer VALUES ('ad6647@nyu.edu', 'Anish Deshpande', MD5('pw-anish'), '101', 'Johnson St', 'Brooklyn', 'NY', '+1-978-995-3171', 'USL758367', '2029-02-27', 'USA', '2005-02-17');
 
 
    
