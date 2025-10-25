@@ -78,8 +78,8 @@ Result (3 rows):
 +-------------+--------------+---------------+--------------+-----+
 | airplane_id | airline_name | seat_capacity | manufacturer | age |
 +-------------+--------------+---------------+--------------+-----+
-| A320-JB2    | Jet Blue     | 180           | Airbus       |   6 |
-| A321-JB1    | Jet Blue     | 200           | Airbus       |   4 |
-| E190-JB1    | Jet Blue     | 100           | Embraer      |   7 |
+| A320-JB2    | Jet Blue     | 180           | Airbus       | 6   |
+| A321-JB1    | Jet Blue     | 200           | Airbus       | 4   |
+| E190-JB1    | Jet Blue     | 100           | Embraer      | 7   |
 +-------------+--------------+---------------+--------------+-----+
 */
