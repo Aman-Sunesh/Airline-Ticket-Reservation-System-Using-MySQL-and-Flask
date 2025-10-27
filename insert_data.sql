@@ -57,7 +57,7 @@ INSERT INTO Flight VALUES ('BA676', '2025-12-25 20:15:00', 'A350-BA1', 'British 
 INSERT INTO Flight VALUES ('EK303',  '2025-10-15 23:15:00', 'B77W-EK2', 'Emirates', 'DXB', 'JFK', '2025-10-16 07:30:00', 'on-time', 920.00);
 INSERT INTO Flight VALUES ('B61234', '2025-11-10 09:00:00', 'A321-JB1', 'Jet Blue', 'JFK', 'PVG', '2025-11-11 01:10:00', 'on-time', 750.00);
 INSERT INTO Flight VALUES ('B61235', '2025-11-15 13:30:00', 'A320-JB2', 'Jet Blue', 'PVG', 'JFK', '2025-11-15 20:10:00', 'delayed', 730.00);
-INSERT INTO Flight VALUES ('EY101',  '2025-11-20 02:00:00', 'B789-EY2', 'AUH', 'JFK', '2025-11-20 09:30:00', 'delayed', 820.00);
+INSERT INTO Flight VALUES ('EY101',  '2025-11-20 02:00:00', 'B789-EY2', 'Etihad Airways', 'AUH', 'JFK', '2025-11-20 09:30:00', 'delayed', 820.00);
 INSERT INTO Flight VALUES ('EK202',  '2025-12-05 22:30:00', 'A380-EK1', 'Emirates',  'DXB', 'SYD', '2025-12-06 17:30:00', 'on-time', 980.00);
 INSERT INTO Flight VALUES ('UA089',  '2025-12-03 12:00:00', 'B738-UA1', 'United Airlines',  'JFK', 'PVG', '2025-12-04 16:00:00', 'on-time', 765.00);
 INSERT INTO Flight VALUES ('AA100',  '2025-11-25 18:00:00', 'A321-AA1', 'American Airlines', 'JFK','DXB', '2025-11-26 15:00:00', 'on-time', 840.00);
