@@ -64,7 +64,7 @@ CREATE TABLE Flight(
   base_price DECIMAL(10,2) NOT NULL CHECK (base_price >= 0),
   CONSTRAINT chk_times_order CHECK (arr_datetime > dep_datetime),
   CONSTRAINT chk_airports_diff CHECK (dep_airport_code <> arr_airport_code),
-  PRIMARY KEY (flight_no, dep_datetime, airplane_id, airline_name),
+  PRIMARY KEY (flight_no, dep_datetime, airline_name),
   FOREIGN KEY (airline_name)  
     REFERENCES Airline(airline_name)
     ON UPDATE CASCADE
@@ -118,8 +118,8 @@ CREATE TABLE Ticket(
   CONSTRAINT chk_card_not_expired CHECK (exp_date >= DATE(purchase_datetime)),
   CONSTRAINT chk_purchase_before_dep CHECK (purchase_datetime <= dep_datetime),
   PRIMARY KEY (ticket_id),
-  FOREIGN KEY (flight_no, dep_datetime, airplane_id, airline_name)
-    REFERENCES Flight(flight_no, dep_datetime, airplane_id, airline_name)
+  FOREIGN KEY (flight_no, dep_datetime, airline_name)
+    REFERENCES Flight(flight_no, dep_datetime, airline_name)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
   FOREIGN KEY (customer_email) 
@@ -137,9 +137,9 @@ CREATE TABLE FlightRating(
   airline_name VARCHAR (50) NOT NULL,
   rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment TEXT,
-  PRIMARY KEY (customer_email, flight_no, dep_datetime, airplane_id, airline_name),
-  FOREIGN KEY (flight_no, dep_datetime, airplane_id, airline_name)
-    REFERENCES Flight(flight_no, dep_datetime, airplane_id, airline_name)
+  PRIMARY KEY (customer_email, flight_no, dep_datetime, airline_name),
+  FOREIGN KEY (flight_no, dep_datetime, airline_name)
+    REFERENCES Flight(flight_no, dep_datetime, airline_name)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
   FOREIGN KEY (customer_email) 
