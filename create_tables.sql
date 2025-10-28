@@ -64,6 +64,7 @@ CREATE TABLE Flight(
   base_price DECIMAL(10,2) NOT NULL CHECK (base_price >= 0),
   CONSTRAINT chk_times_order CHECK (arr_datetime > dep_datetime),
   CONSTRAINT chk_airports_diff CHECK (dep_airport_code <> arr_airport_code),
+  UNIQUE KEY uq_plane_depart (airline_name, airplane_id, dep_datetime),
   PRIMARY KEY (flight_no, dep_datetime, airline_name),
   FOREIGN KEY (airline_name)  
     REFERENCES Airline(airline_name)
