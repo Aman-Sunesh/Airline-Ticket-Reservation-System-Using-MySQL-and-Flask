@@ -55,8 +55,8 @@ CREATE TABLE StaffPhoneNo(
 CREATE TABLE Flight(
   flight_no VARCHAR(10) NOT NULL,
   dep_datetime DATETIME NOT NULL,
-  airplane_id VARCHAR(20) NOT NULL,
   airline_name VARCHAR(50) NOT NULL,
+  airplane_id VARCHAR(20) NOT NULL,
   dep_airport_code CHAR(3) NOT NULL,
   arr_airport_code CHAR(3) NOT NULL,
   arr_datetime DATETIME NOT NULL,
