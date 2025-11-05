@@ -17,7 +17,7 @@ conn = pymysql.connect(host='127.0.0.1',
 #Define a route to hello function
 @app.route('/')
 def hello():
-	return render_template('index.html')
+	return render_template('home.html', username=session.get('email'), role=session.get('role'))
 
 #Define route for login
 @app.route('/login')
@@ -224,8 +224,7 @@ def registerAuth():
 
 @app.route('/home')
 def home():
-    username = session.get('email')  # None if not logged in
-    return render_template('home.html', username=username, role=session.get('role'))
+    return redirect(url_for('hello'))
 
 @app.route('/customer_home')
 def customer_home():
@@ -233,12 +232,14 @@ def customer_home():
 
 @app.route('/staff_home')
 def staff_home():
-    return redirect(url_for('home'))
-
+	# protect staff dashboard; bounce non-staff to login
+	if session.get('role') != 'staff':
+		return redirect(url_for('login'))
+	return render_template('staff_home.html')
 
 @app.route('/logout')
 def logout():
-	session.pop('email')
+	session.clear()
 	return redirect('/')
 		
 app.secret_key = 'some key that you will never guess'
