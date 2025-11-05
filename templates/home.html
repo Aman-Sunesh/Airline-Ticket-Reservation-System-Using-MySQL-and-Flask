@@ -1,34 +1,102 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Airline Reservation — Home</title>
+  <style>
+    :root { --bg:#f7f7fb; --card:#ffffff; --fg:#1c1c1c; --muted:#666; --border:#e6e6ea; --accent:#111; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--accent);color:#fff}
+    header h1{margin:0;font-size:18px}
+    header nav a{color:#fff;text-decoration:none;margin-left:14px}
+    main{max-width:900px;margin:28px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+    form{display:flex;flex-direction:column;gap:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    label{display:flex;flex-direction:column;gap:6px;font-weight:600}
+    input,select{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .muted{color:var(--muted)}
+  </style>
 </head>
 <body>
-<form action="/post" method="POST">
-	<h1>Welcome {{username}}</h1>
-	<input type="text" name = "blog" placeholder="post" required/> </br>
-	<input type="submit" value = Post />
-</form>
+  <header>
+    <h1>Airline Reservation</h1>
+    <nav>
+      {% if username %}
+        <span class="muted">Hi, {{ username }}</span>
+        <a href="/logout">Logout</a>
+      {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      {% endif %}
+    </nav>
+  </header>
 
-<style type="text/css">
-	table, th, td{
-		border: 1px solid black;
-	}
-</style>
+  <main>
+    <div class="card">
+      <h2 style="margin-top:0;">Search Flights</h2>
+      <p class="muted">All users (logged in or not) can search future flights. Choose one-way or round-trip.</p>
 
-<table>
-	<th>Time</th>
-	<th>Post</th>
+      <form action="/search_flights" method="GET" id="public-search-form">
+        <div class="row" role="group" aria-label="Trip type">
+          <label class="row" style="font-weight:600;gap:8px;">
+            <input type="radio" name="trip" value="oneway" checked> One-way
+          </label>
+          <label class="row" style="font-weight:600;gap:8px;">
+            <input type="radio" name="trip" value="round"> Round-trip
+          </label>
+        </div>
 
-{% for line in posts %}
-	<tr>
-		<td>{{line['ts']}}</td>
-		<td>{{line['blog_post']}}</td>
-	</tr>
-{% endfor %}
-</table>
+        <div class="grid">
+          <label>
+            <span>From (city or airport)</span>
+            <input type="text" name="source" placeholder="e.g., JFK or New York" required>
+          </label>
+          <label>
+            <span>To (city or airport)</span>
+            <input type="text" name="destination" placeholder="e.g., PVG or Shanghai" required>
+          </label>
+        </div>
 
-<a href="/logout">Logout</a>
+        <div class="grid">
+          <label>
+            <span>Departure date</span>
+            <input type="date" name="depart_date" required>
+          </label>
+          <label id="return-date-wrap" style="display:none;">
+            <span>Return date</span>
+            <input type="date" name="return_date">
+          </label>
+        </div>
 
+        <div class="row">
+          <button class="btn primary" type="submit">Search</button>
+          <button class="btn" type="reset">Clear</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    
+    // Toggle return date based on trip type
+    const form = document.getElementById('public-search-form');
+    const retWrap = document.getElementById('return-date-wrap');
+    const tripRadios = form.querySelectorAll('input[name="trip"]');
+    const retInput = form.querySelector('input[name="return_date"]');
+    function syncReturn() {
+      const isRound = form.trip.value === 'round';
+      retWrap.style.display = isRound ? '' : 'none';
+      retInput.required = isRound;
+      if (!isRound) retInput.value = '';
+    }
+    tripRadios.forEach(r => r.addEventListener('change', syncReturn));
+    window.addEventListener('DOMContentLoaded', syncReturn);
+  </script>
 </body>
-
-
 </html>
