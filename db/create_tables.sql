@@ -116,7 +116,7 @@ CREATE TABLE Ticket(
   exp_date DATE NOT NULL,
   purchase_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT chk_card_not_expired CHECK (exp_date >= DATE(purchase_datetime)),
-  CONSTRAINT chk_purchase_before_dep CHECK (purchase_datetime <= dep_datetime),
+  CONSTRAINT chk_purchase_before_dep CHECK (purchase_datetime <= dep_datetime),z
   PRIMARY KEY (ticket_id),
   FOREIGN KEY (flight_no, dep_datetime, airline_name)
     REFERENCES Flight(flight_no, dep_datetime, airline_name)
