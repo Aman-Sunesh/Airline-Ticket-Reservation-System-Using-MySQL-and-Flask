@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Customer Dashboard — Airline Reservation</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
+    header{padding:18px 22px;background:#111;color:#fff}
+    main{max-width:900px;margin:28px auto;padding:0 16px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+    .btn{padding:10px 14px;border:1px solid #e6e6ea;border-radius:10px;background:#fff;text-decoration:none;color:inherit}
+    .btn.primary{background:#111;color:#fff;border-color:#111}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    th,td{border:1px solid #e6e6ea;padding:8px;text-align:left}
+    .muted{color:#666}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome, {{ session.get('email') or (username if username is defined else 'Customer') }}!</h1>
+  </header>
+
+  <main>
+    <div class="actions">
+      <a class="btn primary" href="/search_flights">Search Flights</a>
+      <a class="btn" href="/my_tickets">My Tickets</a>
+      <a class="btn" href="/rate_flight">Rate a Flight</a>
+      <a class="btn" href="/logout">Logout</a>
+    </div>
+
+    <h3>Your Upcoming Flights</h3>
+    {% if tickets %}
+      <table>
+        <tr>
+          <th>Flight #</th><th>From</th><th>To</th><th>Departure</th><th>Status</th>
+        </tr>
+        {% for t in tickets %}
+        <tr>
+          <td>{{ t.flight_no }}</td>
+          <td>{{ t.src }}</td>
+          <td>{{ t.dst }}</td>
+          <td>{{ t.dep_datetime }}</td>
+          <td>{{ t.status }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="muted">No bookings yet.</p>
+    {% endif %}
+  </main>
+</body>
+</html>
