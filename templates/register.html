@@ -1,15 +1,159 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Airline Reservation — Customer Registration</title>
+  <style>
+    :root { --bg:#f7f7fb; --card:#ffffff; --fg:#1c1c1c; --muted:#666; --border:#e6e6ea; --accent:#111; --danger:#c62828; }
+    * { box-sizing:border-box }
+    body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+    header { background:var(--accent); color:#fff; padding:18px 22px; }
+    header h1 { margin:0; font-size:18px; }
+    main { max-width:980px; margin:28px auto; padding:0 16px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }
+    form { display:flex; flex-direction:column; gap:18px; }
+    fieldset { border:1px solid var(--border); border-radius:12px; padding:16px; }
+    legend { padding:0 6px; color:#333; font-weight:700; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+    label { display:flex; flex-direction:column; gap:6px; font-weight:600; }
+    label > span { font-size:14px; }
+    label.required > span::after { content:" *"; color:var(--danger); }
+    input { padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:14px; }
+    .hint { font-size:12px; color:var(--muted); margin-top:-6px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn { appearance:none; border:1px solid var(--border); background:#fff; padding:10px 14px; border-radius:10px; cursor:pointer; }
+    .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .alert { padding:10px 12px; border-radius:10px; background:#fff4f4; border:1px solid #ffd7d7; color:#8a1c1c; }
+    .muted { color:var(--muted); font-size:13px; }
+  </style>
 </head>
 <body>
-<form action="/registerAuth" method="POST">
-	<input type="text" name = "username" placeholder="username" required/> </br>
-	<input type="password" name = "password" placeholder="password" required/></br>
-	<input type="submit" value = Register />
-	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
-	{% endif %}
-</form>
-<a href="/">Go back</a>
+  <header><h1>Airline Reservation — Customer Registration</h1></header>
+
+  <main>
+    <div class="card">
+      {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+      <p class="muted">Fields marked with <span style="color:#c62828">*</span> are required.</p>
+
+      <form action="/registerAuth" method="POST" autocomplete="on" id="register-form">
+        <!-- Account -->
+        <fieldset>
+          <legend>Account</legend>
+          <div class="grid">
+            <label class="required">
+              <span>Email</span>
+              <input type="email" name="email" required autocomplete="email" maxlength="255">
+            </label>
+
+            <label class="required">
+              <span>Password</span>
+              <input
+                type="password"
+                name="password"
+                required
+                autocomplete="new-password"
+                pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+                title="At least 8 characters, with one uppercase letter and one number."
+                maxlength="255">
+              <div class="hint">Min 8 chars, include an uppercase letter and a number.</div>
+            </label>
+
+            <label class="required">
+              <span>Full Name</span>
+              <input type="text" name="name" required maxlength="100" autocomplete="name">
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Contact & Address -->
+        <fieldset>
+          <legend>Contact & Address</legend>
+          <div class="grid">
+            <label>
+              <span>Building No.</span>
+              <input type="text" name="building_no" maxlength="20">
+            </label>
+
+            <label>
+              <span>Street</span>
+              <input type="text" name="street" maxlength="200" autocomplete="address-line1">
+            </label>
+
+            <label>
+              <span>City</span>
+              <input type="text" name="city" maxlength="200" autocomplete="address-level2">
+            </label>
+
+            <label>
+              <span>State/Region</span>
+              <input type="text" name="state" maxlength="200" autocomplete="address-level1">
+            </label>
+
+            <label class="required">
+              <span>Phone Number</span>
+              <input
+                type="tel"
+                name="phone_number"
+                required
+                pattern="[\d\+\-\s]{7,20}"
+                title="Digits, spaces, + or - (7–20 characters)"
+                maxlength="20"
+                autocomplete="tel">
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Passport -->
+        <fieldset>
+          <legend>Passport</legend>
+          <div class="grid">
+            <label class="required">
+              <span>Passport Number</span>
+              <input type="text" name="passport_number" required maxlength="20" autocomplete="off">
+            </label>
+
+            <label class="required">
+              <span>Passport Country</span>
+              <input type="text" name="passport_country" required maxlength="60" autocomplete="country-name">
+            </label>
+
+            <label class="required">
+              <span>Date of Birth</span>
+              <input type="date" name="date_of_birth" required id="dob">
+            </label>
+
+            <label class="required">
+              <span>Passport Expiration</span>
+              <input type="date" name="passport_expiration" required id="pexp">
+            </label>
+          </div>
+          <div class="hint">Passport expiration must be after your date of birth.</div>
+        </fieldset>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Create Account</button>
+          <a class="btn" href="/">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    // Keep client-side aligned with DB check: passport_expiration > date_of_birth
+    const dob = document.getElementById('dob');
+    const exp = document.getElementById('pexp');
+    function syncMin() {
+      if (dob.value) {
+        const d = new Date(dob.value);
+        d.setDate(d.getDate() + 1); // strictly greater than DOB
+        exp.min = d.toISOString().slice(0,10);
+      } else {
+        exp.min = '';
+      }
+    }
+    dob.addEventListener('change', syncMin);
+    window.addEventListener('DOMContentLoaded', syncMin);
+  </script>
 </body>
 </html>
