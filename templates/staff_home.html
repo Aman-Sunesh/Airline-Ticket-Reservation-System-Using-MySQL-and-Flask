@@ -7,7 +7,6 @@
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
     header{padding:18px 22px;background:#111;color:#fff}
     main{max-width:900px;margin:28px auto;padding:0 16px}
-    .sub{margin:6px 0 0 0;color:#cfcfcf;font-size:14px}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
     .card{display:block;padding:14px;border:1px solid #e6e6ea;border-radius:12px;background:#fff;text-decoration:none;color:inherit}
     table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
@@ -16,19 +15,29 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Staff Dashboard</h1>
-    <div class="sub">
-      {{ session.get('email') or 'staff' }}{% if session.get('airline_name') %} · {{ session.get('airline_name') }}{% endif %}
-    </div>
+  <header style="display:flex;align-items:center;justify-content:space-between;background:#111;color:#fff;padding:16px 20px">
+    <h1 style="margin:0;font-size:18px">Airline Reservation</h1>
+    <nav>
+      {% if session.get('email') %}
+        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('email') }}</span>
+        <a href="/" style="color:#fff;text-decoration:none;margin-right:12px">Home</a>
+        <a href="/logout" style="color:#fff;text-decoration:none">Logout</a>
+      {% else %}
+        <a href="/" style="color:#fff;text-decoration:none;margin-right:12px">Home</a>
+        <a href="/login" style="color:#fff;text-decoration:none;margin-right:12px">Login</a>
+        <a href="/register" style="color:#fff;text-decoration:none">Register</a>
+      {% endif %}
+    </nav>
   </header>
 
   <main>
+    <h2 style="margin:18px 6px 6px">
+      Staff Dashboard{% if session.get('airline_name') %} · {{ session.get('airline_name') }}{% endif %}
+    </h2>
     <div class="grid">
       <a class="card" href="/create_flight">Create Flight</a>
       <a class="card" href="/manage_flights">Manage Flights</a>
       <a class="card" href="/view_customers">View Customers</a>
-      <a class="card" href="/logout">Logout</a>
     </div>
 
     <h3>Upcoming Flights (My Airline)</h3>
