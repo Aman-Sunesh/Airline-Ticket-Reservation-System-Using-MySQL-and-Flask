@@ -1,33 +1,27 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Airline Reservation — Welcome</title>
+  <style>
+    body{font-family:sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
+    header{padding:20px;background:#111;color:#fff}
+    main{max-width:700px;margin:40px auto;padding:0 16px;text-align:center}
+    .btn{padding:12px 20px;border-radius:8px;text-decoration:none;margin:8px;display:inline-block}
+    .primary{background:#111;color:#fff}
+    .secondary{border:1px solid #111;color:#111}
+  </style>
 </head>
-
 <body>
-{% if not message %}
-	<a href="/login">Login</a>
-	<a href="/register">Register</a>
-{% endif %}
-
-{% if message %}
-	<a href="/logout">Logout</a>
-	<a href="/remove_account">Remove Account</a>
-	<p class="message">You are logged in {{message}}. You have {{num}} follower(s)</p> </br>
-	<a href="/tweets">View your tweets</a> </br>
-	<a href="/find_people">Find people to follow</a> </br>
-	<a href="/unfollow">Unfollow someone</a> </br>
-	<a href="/view_followed">View people you have followed</a> </br>
-	</br>
-
-        <h4>15 most recent tweets from you and your followers </h4> </br>
-
-	{% for line in tweets%}
-	        <p>{{line}}</p>
-	        <hr>
-	{% endfor %}
-	{% endif %}
+  <header>
+    <h1>Airline Reservation</h1>
+  </header>
+  <main>
+    <h2>Welcome to our Airline Management System</h2>
+    <p>Please log in or register to continue.</p>
+    <a class="btn primary" href="/login">Login</a>
+    <a class="btn secondary" href="/register">Register</a>
+  </main>
 </body>
-
 </html>
