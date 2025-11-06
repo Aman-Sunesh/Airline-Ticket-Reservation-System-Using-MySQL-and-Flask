@@ -2,6 +2,7 @@ import re
 from flask import *
 import pymysql.cursors
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # Initialize the app from Flask
 app = Flask(__name__)
@@ -14,10 +15,57 @@ conn = pymysql.connect(host='127.0.0.1',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
-#Define a route to hello function
-@app.route('/')
-def hello():
-	return render_template('home.html', username=session.get('email'), role=session.get('role'))
+# Mapping of airport IATA codes to their respective IANA timezone names.
+# This is used to assign the correct timezone to departure and arrival datetimes.
+AIRPORT_TZ = {
+    'JFK': 'America/New_York',
+    'BOS': 'America/New_York',
+    'ORD': 'America/Chicago',
+    'LAX': 'America/Los_Angeles',
+    'LHR': 'Europe/London',
+    'PVG': 'Asia/Shanghai',
+    'DXB': 'Asia/Dubai',
+    'AUH': 'Asia/Dubai',
+    'SYD': 'Australia/Sydney',
+}
+
+def _recompute_durations(rows):
+    """
+    Post-processes flight data rows by recomputing flight durations across time zones.
+    This ensures accurate and consistent durations for routes crossing time zones,
+    instead of relying on DB-stored duration strings (which may be incorrect).
+	"""
+    if not rows:
+        return
+
+    for r in rows:
+        try:
+            # Create departure datetime with timezone
+            dep_date_str = r['d_date'] + " " + r['d_time']
+            dep_dt = datetime.strptime(dep_date_str, "%B %d, %Y %I:%M %p")
+            dep_dt = dep_dt.replace(tzinfo=ZoneInfo(AIRPORT_TZ[r['dep_airport_code']]))
+
+            # Create arrival datetime with timezone
+            arr_date_str = r['a_date'] + " " + r['a_time']
+            arr_dt = datetime.strptime(arr_date_str, "%B %d, %Y %I:%M %p")
+            arr_dt = arr_dt.replace(tzinfo=ZoneInfo(AIRPORT_TZ[r['arr_airport_code']]))
+
+            # Convert both datetimes to UTC
+            dep_utc = dep_dt.astimezone(ZoneInfo('UTC'))
+            arr_utc = arr_dt.astimezone(ZoneInfo('UTC'))
+
+            # Calculate difference in minutes
+            total_seconds = (arr_utc - dep_utc).total_seconds()
+            minutes = int(total_seconds // 60)
+
+            # Format as "HHh MMm"
+            hours = minutes // 60
+            mins = minutes % 60
+            r['flight_duration'] = f"{hours:02d}h {mins:02d}m"
+
+        except Exception:
+            # If anything goes wrong, skip and keep existing value
+            continue
 
 #Define route for login
 @app.route('/login')
@@ -219,12 +267,129 @@ def registerAuth():
 		conn.commit()
 		cursor.close()
 
-	username = session.get('email')
-	return render_template('index.html', username=username)
+	return redirect(url_for('home'))
 
-@app.route('/home')
+
+@app.route('/search_flights', methods=['GET'])
+def search_flights():
+	# Grabs information from the forms
+	trip_type = request.args.get('trip', 'oneway')
+	source = request.args.get('source', '').strip().upper()
+	destination = request.args.get('destination', '').strip().upper()
+	depart_date = request.args.get('depart_date')
+	return_date = request.args.get('return_date')
+
+	# basic validation
+	if not (source and destination and depart_date):
+		airports = get_airport_codes()
+		return render_template('home.html', error="Please fill all required fields.", airports=airports)
+
+	# disallow same-airport searches
+	if source == destination:
+		airports = get_airport_codes()
+		return render_template('home.html', error="From and To cannot be the same airport.", airports=airports)
+ 
+	if (trip_type == "oneway"):
+		query =  """SELECT flight_no, airline_name, dep_airport_code, arr_airport_code, 
+						   DATE_FORMAT(dep_datetime, '%%M %%e, %%Y') AS d_date,
+				           DATE_FORMAT(dep_datetime, '%%l:%%i %%p') AS d_time,
+						   DATE_FORMAT(arr_datetime, '%%M %%e, %%Y') AS a_date,
+				           DATE_FORMAT(arr_datetime, '%%l:%%i %%p') AS a_time,
+						   TIME_FORMAT(TIMEDIFF(arr_datetime, dep_datetime), '%%Hh %%im') AS flight_duration,
+						   base_price
+				    FROM flight
+					WHERE dep_airport_code = %s AND arr_airport_code = %s AND 
+					      DATE(dep_datetime) = %s AND dep_datetime > NOW()
+					ORDER BY dep_datetime ASC; 
+				"""
+		# cursor used to send queries
+		cursor = conn.cursor()
+		cursor.execute(query, (source, destination, depart_date))
+
+		#stores the results in a variable
+		data = cursor.fetchall()
+		_recompute_durations(data)
+		airports = get_airport_codes()
+		cursor.close()
+
+
+		return render_template(
+			'home.html',
+			outbound=data,          
+			trip=trip_type,
+			source=source,
+			destination=destination,
+			depart_date=depart_date,
+			airports=airports,
+		)
+	
+	elif (trip_type == "round"):
+		if not return_date:
+			airports = get_airport_codes()
+			return render_template('home.html', error="Please pick a return date for round trips.", airports=airports)
+		
+		# ensure chronological round-trip dates
+		if return_date < depart_date:
+			airports = get_airport_codes()
+			return render_template('home.html', error="Return date must be on or after the departure date.", airports=airports)
+
+		query =  """SELECT flight_no, airline_name, dep_airport_code, arr_airport_code, 
+						   DATE_FORMAT(dep_datetime, '%%M %%e, %%Y') AS d_date,
+				           DATE_FORMAT(dep_datetime, '%%l:%%i %%p') AS d_time,
+						   DATE_FORMAT(arr_datetime, '%%M %%e, %%Y') AS a_date,
+				           DATE_FORMAT(arr_datetime, '%%l:%%i %%p') AS a_time,
+						   TIME_FORMAT(TIMEDIFF(arr_datetime, dep_datetime), '%%Hh %%im') AS flight_duration,
+						   base_price
+				    FROM flight
+					WHERE dep_airport_code = %s AND arr_airport_code = %s AND 
+					      DATE(dep_datetime) = %s AND dep_datetime > NOW()
+					ORDER BY dep_datetime ASC; 
+				"""
+		
+		cursor = conn.cursor()
+
+		# source -> destination flights on depart_date
+		cursor.execute(query, (source, destination, depart_date))
+		outbound = cursor.fetchall()
+
+		# destination -> source flights on return_date
+		cursor.execute(query, (destination, source, return_date))
+		inbound = cursor.fetchall()
+		cursor.close()
+
+		_recompute_durations(outbound)
+		_recompute_durations(inbound)
+
+		airports = get_airport_codes()
+		return render_template(
+			'home.html',
+			trip=trip_type,
+			source=source,
+			destination=destination,
+			depart_date=depart_date,
+			return_date=return_date,
+			outbound=outbound,
+			inbound=inbound,
+			airports=airports,
+		)
+
+def get_airport_codes():
+	cursor = conn.cursor()
+	cursor.execute("SELECT code FROM Airport ORDER BY code")
+	rows = cursor.fetchall()
+	cursor.close()
+	return [row["code"] for row in rows]
+
+
+@app.get("/")
 def home():
-    return redirect(url_for('hello'))
+	airports = get_airport_codes()
+	return render_template(
+		"home.html",
+		username=session.get("email"),
+		role=session.get("role"),
+		airports=airports,
+	)
 
 @app.route('/customer_home')
 def customer_home():
@@ -243,6 +408,7 @@ def logout():
 	return redirect('/')
 		
 app.secret_key = 'some key that you will never guess'
+
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask
 #for changes to go through, TURN OFF FOR PRODUCTION
