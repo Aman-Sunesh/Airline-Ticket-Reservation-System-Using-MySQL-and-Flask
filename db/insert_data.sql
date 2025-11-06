@@ -5,7 +5,8 @@ INSERT INTO Airline VALUES ('Emirates');
 INSERT INTO Airline VALUES ('United Airlines');
 INSERT INTO Airline VALUES ('American Airlines');
 INSERT INTO Airline VALUES ('British Airways');
-
+INSERT INTO Airline VALUES ('Delta Air Lines');
+INSERT INTO Airline VALUES ('Air Canada');
 
 
 -- Airports
@@ -15,6 +16,9 @@ INSERT INTO Airport VALUES ('DXB', 'Dubai', 'UAE', 'international');
 INSERT INTO Airport VALUES ('AUH', 'Abu Dhabi', 'UAE', 'international');
 INSERT INTO Airport VALUES ('SYD', 'Sydney', 'Australia', 'international');
 INSERT INTO Airport VALUES ('LHR', 'London Heathrow', 'UK', 'international');
+INSERT INTO Airport VALUES ('LAX','Los Angeles','USA','domestic');
+INSERT INTO Airport VALUES ('BOS','Boston','USA','domestic');
+INSERT INTO Airport VALUES ('ORD','Chicago','USA','domestic');
 
 
 -- Airplane
@@ -28,6 +32,11 @@ INSERT INTO Airplane VALUES ('A380-EK1', 'Emirates', 517, 'Airbus', 5);
 INSERT INTO Airplane VALUES ('B77W-EK2', 'Emirates', 360, 'Boeing', 8);
 INSERT INTO Airplane VALUES ('B738-UA1', 'United Airlines', 160, 'Boeing', 9);
 INSERT INTO Airplane VALUES ('A321-AA1', 'American Airlines', 190, 'Airbus', 7);
+INSERT INTO Airplane VALUES ('B738-DL1','Delta Air Lines',175,'Boeing',6);
+INSERT INTO Airplane VALUES ('A321-DL2','Delta Air Lines',190,'Airbus',4);
+INSERT INTO Airplane VALUES ('A220-DL3','Delta Air Lines',120,'Airbus',2);
+INSERT INTO Airplane VALUES ('A220-AC1','Air Canada',125,'Airbus',3);
+INSERT INTO Airplane VALUES ('B737-AC2','Air Canada',170,'Boeing',5);
 
 
 -- AirlineStaff
@@ -38,6 +47,8 @@ INSERT INTO AirlineStaff VALUES ('s.hughes', MD5('UA-Admin#2025'), 'United Airli
 INSERT INTO AirlineStaff VALUES ('d.nguyen', MD5('AA-Admin#2025'), 'American Airlines', 'David', 'Nguyen', '1988-05-30', 'd.nguyen@aa.com');
 INSERT INTO AirlineStaff VALUES ('l.perera', MD5('EK-OPS#2025'), 'Emirates', 'Lakshmi', 'Perera', '1991-02-14', 'l.perera@emirates.com');
 INSERT INTO AirlineStaff VALUES ('h.alhammadi', MD5('EY-OPS#2025'), 'Etihad Airways', 'Huda','Al Hammadi', '1993-07-19', 'h.alhammadi@etihad.ae');
+INSERT INTO AirlineStaff VALUES ('k.miller', MD5('DL-Admin#2025'), 'Delta Air Lines', 'Kevin','Miller','1987-04-11','k.miller@delta.com');
+INSERT INTO AirlineStaff VALUES ('r.singh', MD5('AC-Admin#2025'), 'Air Canada', 'Riya','Singh','1989-09-02','r.singh@aircanada.ca');
 
 
 -- StaffPhoneNo
@@ -49,6 +60,8 @@ INSERT INTO StaffPhoneNo VALUES ('s.hughes', '+1-312-555-0303');
 INSERT INTO StaffPhoneNo VALUES ('d.nguyen', '+1-817-555-0404');
 INSERT INTO StaffPhoneNo VALUES ('l.perera', '+971-4-555-0606');
 INSERT INTO StaffPhoneNo VALUES ('h.alhammadi', '+971-2-555-0707');
+INSERT INTO StaffPhoneNo VALUES ('k.miller', '+1-404-555-0101');
+INSERT INTO StaffPhoneNo VALUES ('r.singh',  '+1-416-555-0202');
 
 
 -- Flight
@@ -63,7 +76,52 @@ INSERT INTO Flight VALUES ('UA089',  '2025-12-03 12:00:00', 'United Airlines', '
 INSERT INTO Flight VALUES ('AA100',  '2025-11-25 18:00:00', 'American Airlines', 'A321-AA1', 'JFK','DXB', '2025-11-26 15:00:00', 'on-time', 840.00);
 INSERT INTO Flight VALUES ('EY202',  '2025-12-10 01:30:00', 'Etihad Airways', 'A380-EY1',   'AUH', 'SYD', '2025-12-10 18:45:00', 'on-time', 995.00);
 INSERT INTO Flight VALUES ('UA123',  '2025-11-28 10:00:00', 'United Airlines', 'B738-UA1',  'PVG', 'JFK', '2025-11-28 23:40:00', 'on-time', 770.00);
-
+INSERT INTO Flight VALUES ('B61240','2025-11-25 08:00:00','Jet Blue','E190-JB1','BOS','JFK','2025-11-25 09:30:00','on-time',120.00);
+INSERT INTO Flight VALUES ('B61241','2025-11-25 18:00:00','Jet Blue','A320-JB2','JFK','BOS','2025-11-25 19:30:00','on-time',130.00);
+INSERT INTO Flight VALUES ('B61242','2026-01-06 07:00:00','Jet Blue','A321-JB1','JFK','LAX','2026-01-06 10:15:00','on-time',320.00);
+INSERT INTO Flight VALUES ('B61243','2026-01-07 14:00:00','Jet Blue','A320-JB2','LAX','JFK','2026-01-07 22:00:00','delayed',330.00);
+INSERT INTO Flight VALUES ('B61244','2025-12-02 09:00:00','Jet Blue','E190-JB1','JFK','ORD','2025-12-02 10:30:00','on-time',150.00);
+INSERT INTO Flight VALUES ('B61245','2025-12-02 17:30:00','Jet Blue','E190-JB1','ORD','JFK','2025-12-02 19:00:00','on-time',150.00);
+INSERT INTO Flight VALUES ('UA201','2025-12-03 09:30:00','United Airlines','B738-UA1','ORD','JFK','2025-12-03 11:45:00','on-time',145.00);
+INSERT INTO Flight VALUES ('UA202','2025-12-05 11:00:00','United Airlines','B738-UA1','JFK','ORD','2025-12-05 13:10:00','on-time',150.00);
+INSERT INTO Flight VALUES ('UA203','2026-01-10 08:00:00','United Airlines','B738-UA1','LAX','JFK','2026-01-10 16:00:00','on-time',340.00);
+INSERT INTO Flight VALUES ('UA204','2026-01-12 18:00:00','United Airlines','B738-UA1','JFK','LAX','2026-01-12 21:30:00','delayed',350.00);
+INSERT INTO Flight VALUES ('UA205','2025-12-01 21:00:00','United Airlines','B738-UA1','JFK','SYD','2025-12-03 08:00:00','on-time',980.00);
+INSERT INTO Flight VALUES ('AA205','2025-12-01 08:30:00','American Airlines','A321-AA1','JFK','LAX','2025-12-01 12:10:00','on-time',360.00);
+INSERT INTO Flight VALUES ('AA206','2026-01-15 14:30:00','American Airlines','A321-AA1','LAX','JFK','2026-01-15 22:30:00','on-time',355.00);
+INSERT INTO Flight VALUES ('AA207','2025-11-29 06:30:00','American Airlines','A321-AA1','BOS','JFK','2025-11-29 07:45:00','on-time',110.00);
+INSERT INTO Flight VALUES ('BA150','2025-12-28 10:00:00','British Airways','A350-BA1','LHR','JFK','2025-12-28 14:00:00','on-time',680.00);
+INSERT INTO Flight VALUES ('BA151','2025-12-29 21:00:00','British Airways','A350-BA1','JFK','LHR','2025-12-30 08:30:00','on-time',690.00);
+INSERT INTO Flight VALUES ('EK016','2025-12-06 14:00:00','Emirates','A380-EK1','LHR','DXB','2025-12-06 23:55:00','on-time',520.00);
+INSERT INTO Flight VALUES ('EK204','2025-12-12 23:00:00','Emirates','A380-EK1','JFK','DXB','2025-12-13 20:30:00','on-time',880.00);
+INSERT INTO Flight VALUES ('EK205','2025-12-14 02:00:00','Emirates','B77W-EK2','DXB','JFK','2025-12-14 10:30:00','on-time',880.00);
+INSERT INTO Flight VALUES ('EY018','2025-12-12 02:00:00','Etihad Airways','B789-EY2','AUH','LHR','2025-12-12 07:00:00','on-time',740.00);
+INSERT INTO Flight VALUES ('EY019','2025-12-12 11:00:00','Etihad Airways','A380-EY1','LHR','AUH','2025-12-12 21:00:00','on-time',740.00);
+INSERT INTO Flight VALUES ('EY120','2025-12-18 01:15:00','Etihad Airways','A380-EY1','AUH','SYD','2025-12-18 19:45:00','delayed',1020.00);
+INSERT INTO Flight VALUES ('DL1001','2025-11-26 07:00:00','Delta Air Lines','A220-DL3','JFK','BOS','2025-11-26 08:10:00','on-time',105.00);
+INSERT INTO Flight VALUES ('DL1002','2025-11-26 18:00:00','Delta Air Lines','A220-DL3','BOS','JFK','2025-11-26 19:10:00','on-time',105.00);
+INSERT INTO Flight VALUES ('DL1200','2025-11-29 09:15:00','Delta Air Lines','B738-DL1','JFK','ORD','2025-11-29 11:00:00','on-time',140.00);
+INSERT INTO Flight VALUES ('DL1201','2025-11-29 15:00:00','Delta Air Lines','B738-DL1','ORD','JFK','2025-11-29 17:00:00','on-time',140.00);
+INSERT INTO Flight VALUES ('DL1300','2026-01-04 07:45:00','Delta Air Lines','A321-DL2','LAX','JFK','2026-01-04 15:45:00','on-time',345.00);
+INSERT INTO Flight VALUES ('DL1301','2026-01-04 17:45:00','Delta Air Lines','A321-DL2','JFK','LAX','2026-01-04 21:15:00','on-time',345.00);
+INSERT INTO Flight VALUES ('AC101','2026-01-20 20:00:00','Air Canada','A220-AC1','JFK','LHR','2026-01-21 08:00:00','on-time',610.00);
+INSERT INTO Flight VALUES ('AC102','2026-01-22 10:00:00','Air Canada','B737-AC2','LHR','JFK','2026-01-22 14:00:00','on-time',620.00);
+INSERT INTO Flight VALUES ('AC120','2025-11-26 06:30:00','Air Canada','A220-AC1','JFK','ORD','2025-11-26 08:15:00','on-time',150.00);
+INSERT INTO Flight VALUES ('AC121','2025-11-26 19:00:00','Air Canada','A220-AC1','ORD','JFK','2025-11-26 20:45:00','on-time',150.00);
+INSERT INTO Flight VALUES ('AA208','2025-12-06 09:00:00','American Airlines','A321-AA1', 'JFK','ORD','2025-12-06 10:50:00','on-time',155.00);
+INSERT INTO Flight VALUES ('AA209','2025-12-06 18:30:00','American Airlines','A321-AA1', 'ORD','JFK','2025-12-06 20:20:00','on-time',155.00);
+INSERT INTO Flight VALUES ('AC122','2025-12-07 13:20:00','Air Canada','A220-AC1', 'JFK','ORD','2025-12-07 15:05:00','on-time',152.00);
+INSERT INTO Flight VALUES ('UA206','2025-12-06 06:30:00','United Airlines','B738-UA1','JFK','ORD','2025-12-06 08:15:00','on-time',148.00);
+INSERT INTO Flight VALUES ('DL1210','2025-12-06 07:45:00','Delta Air Lines','B738-DL1','JFK','ORD','2025-12-06 09:30:00','on-time',142.00);
+INSERT INTO Flight VALUES ('AC130','2025-12-06 10:30:00','Air Canada','A220-AC1','JFK','ORD','2025-12-06 12:15:00','on-time',150.00);
+INSERT INTO Flight VALUES ('AA210','2025-12-06 13:45:00','American Airlines','A321-AA1','JFK','ORD','2025-12-06 15:35:00','on-time',159.00);
+INSERT INTO Flight VALUES ('UA207','2025-12-06 18:55:00','United Airlines','B738-UA1','JFK','ORD','2025-12-06 20:40:00','on-time',151.00);
+INSERT INTO Flight VALUES ('DL1003','2025-11-25 12:00:00','Delta Air Lines','A220-DL3','BOS','JFK', '2025-11-25 13:10:00','on-time',115.00);
+INSERT INTO Flight VALUES ('B61248','2025-11-26 20:00:00','Jet Blue','A320-JB2','JFK','BOS', '2025-11-26 21:30:00','on-time',125.00);
+INSERT INTO Flight VALUES ('B61250','2025-12-10 07:30:00','Jet Blue','A320-JB2','JFK','BOS', '2025-12-10 08:50:00','on-time',125.00);
+INSERT INTO Flight VALUES ('DL1010','2025-12-10 17:45:00','Delta Air Lines','A220-DL3','JFK','BOS', '2025-12-10 19:10:00','on-time',128.00);
+INSERT INTO Flight VALUES ('AA211','2025-12-19 09:00:00','American Airlines','A321-AA1','BOS','JFK', '2025-12-19 10:20:00','on-time',119.00);
+INSERT INTO Flight VALUES ('UA208','2025-12-19 19:15:00','United Airlines','B738-UA1','BOS','JFK', '2025-12-19 20:35:00','on-time',121.00);
 
 
 -- Customer
@@ -77,7 +135,6 @@ INSERT INTO Customer VALUES ('li.wei@outlook.com', 'Li Wei', MD5('pw-liwei'),'88
 INSERT INTO Customer VALUES ('fatima.tamimi@outlook.com', 'Fatima Al Tamimi', MD5('pw-fatima'), '7', 'Corniche Rd', 'Abu Dhabi', 'AD', '+971-50-000-0023', 'AE12345PQ', '2032-06-30', 'UAE', '1998-02-10');
 INSERT INTO Customer VALUES ('ahmed.khan@gmail.com', 'Ahmed Khan', MD5('pw-ahmed'), '9', 'Ittihad St', 'Abu Dhabi', 'AD', '+971-50-000-0042','PKP556677', '2031-10-31', 'UAE', '1994-12-01');
 INSERT INTO Customer VALUES ('ad6647@nyu.edu', 'Anish Deshpande', MD5('pw-anish'), '101', 'Johnson St', 'Brooklyn', 'NY', '+1-978-995-3171', 'USL758367', '2029-02-27', 'USA', '2005-02-17');
-
 
    
 -- Ticket
