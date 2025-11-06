@@ -21,9 +21,19 @@
     label.required > span::after { content:" *"; color:var(--danger); }
     input { padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:14px; }
     .hint { font-size:12px; color:var(--muted); margin-top:-6px; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; }
-    .btn { appearance:none; border:1px solid var(--border); background:#fff; padding:10px 14px; border-radius:10px; cursor:pointer; }
-    .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
+    .btn{
+      -webkit-appearance:none; appearance:none;
+      display:inline-flex; align-items:center; justify-content:center;
+      height:44px; min-width:200px; padding:0 16px;            
+      border:1px solid #111; border-radius:12px; background:#fff;
+      cursor:pointer; text-decoration:none; text-align:center;
+      font-size:16px; font-weight:600; line-height:1;         
+      box-sizing:border-box;
+    }
+    .btn.primary{ background:#111; color:#fff; border-color:#111; }
+    .btn.primary:link,.btn.primary:visited{ color:#fff; }
+    .actions .btn{ flex:0 0 200px; }                                        
     .alert { padding:10px 12px; border-radius:10px; background:#fff4f4; border:1px solid #ffd7d7; color:#8a1c1c; }
     .muted { color:var(--muted); font-size:13px; }
   </style>
@@ -132,7 +142,7 @@
 
         <div class="actions">
           <button class="btn primary" type="submit">Create Account</button>
-          <a class="btn" href="/">Cancel</a>
+          <a class="btn primary" href="/" role="button">Cancel</a>
         </div>
       </form>
     </div>
