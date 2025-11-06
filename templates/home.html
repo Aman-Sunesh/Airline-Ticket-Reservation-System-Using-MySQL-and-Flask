@@ -21,69 +21,198 @@
     .btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
     .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
     .muted{color:var(--muted)}
+    /* --- simple flight results --- */
+    .result-list{display:flex;flex-direction:column;gap:12px}
+    .flight{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:12px;padding:14px}
+    .flight .left{display:flex;align-items:center;gap:12px;min-width:220px}
+    .flight .logo{width:40px;height:40px;border-radius:50%;object-fit:contain;border:1px solid var(--border);background:#fff}
+    .flight .bigtime{font-weight:800;font-size:28px;line-height:1}
+    .flight .tiny{color:var(--muted);font-size:14px}
+    .flight .mid{flex:1;display:flex;flex-direction:column;align-items:center}
+    .track{position:relative;height:2px;background:var(--border);width:160px;margin:6px 0}
+    .dot{position:absolute;top:-4px;width:10px;height:10px;border:2px solid var(--border);background:#fff;border-radius:50%}
+    .dot.start{left:0}
+    .dot.end{right:0}
+    .pill{border:1px solid #cfd1d5;border-radius:6px;padding:4px 8px;font-weight:600}
+    .flight .meta{color:var(--muted);font-size:13px}
+    .flight .airline{font-size:14px;font-weight:600;margin-top:6px}
+    .flight .right{text-align:right;min-width:140px}
+    .flight .price{font-weight:800;font-size:18px;margin-top:6px}
+    .badge{display:inline-block;background:#e9f7ec;color:#157f3b;padding:6px 10px;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:8px}
   </style>
 </head>
 <body>
   <header>
     <h1>Airline Reservation</h1>
     <nav>
-      {% if username %}
-        <span class="muted">Hi, {{ username }}</span>
+    {% if session.get('email') %}
+        <span class="muted">Hi, {{ session.get('email') }}</span>
         <a href="/logout">Logout</a>
-      {% else %}
+    {% else %}
         <a href="/login">Login</a>
         <a href="/register">Register</a>
-      {% endif %}
+    {% endif %}
     </nav>
   </header>
 
   <main>
     <div class="card">
       <h2 style="margin-top:0;">Search Flights</h2>
-      <p class="muted">All users (logged in or not) can search future flights. Choose one-way or round-trip.</p>
-
       <form action="/search_flights" method="GET" id="public-search-form">
+        {% set t = request.args.get('trip', trip|default('oneway')) %}
         <div class="row" role="group" aria-label="Trip type">
           <label class="row" style="font-weight:600;gap:8px;">
-            <input type="radio" name="trip" value="oneway" checked> One-way
+            <input type="radio" name="trip" value="oneway" {% if t != 'round' %}checked{% endif %}> One-way
           </label>
           <label class="row" style="font-weight:600;gap:8px;">
-            <input type="radio" name="trip" value="round"> Round-trip
+            <input type="radio" name="trip" value="round"  {% if t == 'round' %}checked{% endif %}> Round-trip
           </label>
         </div>
 
         <div class="grid">
           <label>
-            <span>From (city or airport)</span>
-            <input type="text" name="source" placeholder="e.g., JFK or New York" required>
+            <span>From</span>
+            <select name="source" required aria-label="From airport">
+              <option value="" disabled selected>— Select airport —</option>
+              {% for code in airports or [] %}
+                <option value="{{ code }}"
+                  {% if request.args.get('source','') == code %}selected{% endif %}>
+                  {{ code }}
+                </option>
+              {% endfor %}
+            </select>
           </label>
           <label>
-            <span>To (city or airport)</span>
-            <input type="text" name="destination" placeholder="e.g., PVG or Shanghai" required>
+            <span>To</span>
+            <select name="destination" required aria-label="To airport">
+              <option value="" disabled selected>— Select airport —</option>
+              {% for code in airports or [] %}
+                <option value="{{ code }}"
+                  {% if request.args.get('destination','') == code %}selected{% endif %}>
+                  {{ code }}
+                </option>
+              {% endfor %}
+            </select>
           </label>
         </div>
 
         <div class="grid">
           <label>
             <span>Departure date</span>
-            <input type="date" name="depart_date" required>
+            <input type="date" name="depart_date" required
+                   value="{{ request.args.get('depart_date', depart_date|default('')) }}">         
           </label>
-          <label id="return-date-wrap" style="display:none;">
-            <span>Return date</span>
-            <input type="date" name="return_date">
+          <label id="return-date-wrap" {% if t=='round' %}style=""{% else %}style="display:none;"{% endif %}>
+            <span>Return date</span>     
+            <input type="date" name="return_date"
+                   value="{{ request.args.get('return_date', return_date|default('')) }}">            
           </label>
         </div>
 
         <div class="row">
           <button class="btn primary" type="submit">Search</button>
-          <button class="btn" type="reset">Clear</button>
+          <button class="btn" type="button" id="clear-btn">Clear</button>
         </div>
       </form>
     </div>
+    {% if error %}
+      <div id="error-block" class="card" style="margin-top:16px; color:#b00020;">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    {# search results #}
+    <div id="search-results">
+    {% if outbound is defined %}
+      <div class="card" style="margin-top:16px;">
+        <h3 style="margin:0 0 10px 0;">Outbound flights</h3>
+        <div class="result-list">
+          {% for r in outbound %}
+            <article class="flight">
+              <div class="left">
+                {# airline logo file in /static/airlines, e.g., air_canada.png, jet_blue.png #}
+                {% set logo_name = (r.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+                <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}" alt="{{ r.airline_name }}">
+                <div>
+                  <div class="bigtime">{{ r.d_time }}</div>
+                  <div class="tiny">{{ r.dep_airport_code }} · {{ r.d_date }}</div>
+                </div>
+              </div>
+
+              <div class="mid">
+                {% if r.flexible|default(false) %}
+                  <div class="badge">Flexible ticket upgrade available</div>
+                {% endif %}
+                <div class="track">
+                  <span class="dot start"></span>
+                  <span class="dot end"></span>
+                </div>
+                <div class="pill">{{ r.stops_text|default('Direct') }}</div>
+                <div class="meta">{{ r.flight_duration }}</div>
+                <div class="airline">{{ r.airline_name }}{% if r.operated_by is defined %}, operated by {{ r.operated_by }}{% endif %} · <strong>{{ r.flight_no }}</strong></div>
+              </div>
+
+              <div class="right">
+                <div class="bigtime">{{ r.a_time }}</div>
+                <div class="tiny">{{ r.arr_airport_code }} · {{ r.a_date }}</div>
+                <div class="price">${{ '%.2f'|format(r.base_price) }}</div>
+              </div>
+            </article>
+          {% else %}
+            <p class="muted">No flights found.</p>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if inbound is defined and inbound %}
+    <div class="card" style="margin-top:16px;">
+        <h3 style="margin:0 0 10px 0;">Return flights</h3>
+        <div class="result-list">
+        {% for r in inbound %}
+            <article class="flight">
+            <div class="left">
+                {% set logo_name = (r.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+                <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}" alt="{{ r.airline_name }}">
+                <div>
+                <div class="bigtime">{{ r.d_time }}</div>
+                <div class="tiny">{{ r.dep_airport_code }} · {{ r.d_date }}</div>
+                </div>
+            </div>
+
+            <div class="mid">
+                {% if r.flexible|default(false) %}
+                <div class="badge">Flexible ticket upgrade available</div>
+                {% endif %}
+                <div class="track">
+                <span class="dot start"></span>
+                <span class="dot end"></span>
+                </div>
+                <div class="pill">{{ r.stops_text|default('Direct') }}</div>
+                <div class="meta">{{ r.flight_duration }}</div>
+                <div class="airline">
+                {{ r.airline_name }}{% if r.operated_by is defined %}, operated by {{ r.operated_by }}{% endif %} ·
+                <strong>{{ r.flight_no }}</strong>
+                </div>
+            </div>
+
+            <div class="right">
+                <div class="bigtime">{{ r.a_time }}</div>
+                <div class="tiny">{{ r.arr_airport_code }} · {{ r.a_date }}</div>
+                <div class="price">${{ '%.2f'|format(r.base_price) }}</div>
+            </div>
+            </article>
+        {% else %}
+            <p class="muted">No return flights found.</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    </div> 
   </main>
 
+
   <script>
-    
+
     // Toggle return date based on trip type
     const form = document.getElementById('public-search-form');
     const retWrap = document.getElementById('return-date-wrap');
@@ -97,6 +226,30 @@
     }
     tripRadios.forEach(r => r.addEventListener('change', syncReturn));
     window.addEventListener('DOMContentLoaded', syncReturn);
+
+    const clearBtn = document.getElementById('clear-btn');
+    clearBtn.addEventListener('click', () => {
+    const sourceSel = form.querySelector('select[name="source"]');
+    const destSel   = form.querySelector('select[name="destination"]');
+    const depInput  = form.querySelector('input[name="depart_date"]');
+    const retInput  = form.querySelector('input[name="return_date"]');
+
+    // reset fields
+    form.trip.value = 'oneway';
+    if (sourceSel) sourceSel.selectedIndex = 0;
+    if (destSel)   destSel.selectedIndex   = 0;
+    if (depInput)  depInput.value = '';
+    if (retInput)  retInput.value = '';
+    syncReturn();
+
+    // clear results & error and clean URL
+    const results = document.getElementById('search-results');
+    if (results) results.innerHTML = '';
+    const err = document.getElementById('error-block');
+    if (err) err.remove();
+    if (location.search) history.replaceState(null, '', location.pathname);
+    });
+
   </script>
 </body>
 </html>
