@@ -1,31 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8" /><title>Login — Airline Reservation</title>
-<style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
-  header{padding:16px 20px;background:#111;color:#fff;display:flex;justify-content:space-between}
-  main{max-width:520px;margin:28px auto;padding:0 16px}
-  .card{background:#fff;border:1px solid #e6e6ea;border-radius:12px;padding:18px}
-  input{width:100%;padding:10px 12px;border:1px solid #e6e6ea;border-radius:10px;margin-bottom:10px}
-  .btn{padding:10px 14px;border:1px solid #e6e6ea;border-radius:10px;background:#fff;cursor:pointer}
-  .primary{background:#111;color:#fff;border-color:#111}
-  .error{color:#b00020}
-</style></head>
+<head>
+  <meta charset="utf-8" />
+  <title>Airline Reservation — Customer Login</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
+    header{padding:16px 20px;background:#111;color:#fff;display:flex;justify-content:flex-start}
+    main{max-width:560px;margin:28px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid #e6e6ea;border-radius:12px;padding:18px;overflow:hidden}
+    input{display:block;width:100%;padding:10px 12px;border:1px solid #e6e6ea;border-radius:10px;margin-bottom:10px}
+    .btn{
+      -webkit-appearance:none;appearance:none;                
+      display:inline-flex;align-items:center;justify-content:center;
+      height:44px;min-width:200px;padding:0 16px;               
+      border:1px solid #111;border-radius:12px;background:#fff; 
+      cursor:pointer;text-decoration:none;text-align:center;
+      font-size:16px;font-weight:600;line-height:1;            
+      box-sizing:border-box;
+    }
+    .primary{background:#111;color:#fff;border-color:#111}
+    .btn.primary:link,.btn.primary:visited{color:#fff}
+    .btn.primary:hover{filter:brightness(1.05)}
+    .actions{
+      display:flex;
+      justify-content:space-between;        
+      align-items:center;
+      gap:10px;
+      margin-top:6px;
+      width:100%;
+    }
+    .actions .btn{ flex:0 0 200px; }  
+	.error{color:#b00020}
+  </style>
+</head>
 <body>
-  <header><div>Airline Reservation</div><nav><a href="/">Home</a></nav></header>
+  <header><div>Airline Reservation</div></header>
   <main><div class="card">
 <form action="/loginAuth" method="POST">
 	<input type="text" name = "email" placeholder="email" required/> </br>
 	<input type="password" name = "password" placeholder="password" required/></br>
-	<button class="btn primary" type="submit">Login</button>
+	<div class="actions">
+	  <button class="btn primary" type="submit">Login</button>
+	  <a class="btn primary" href="/" role="button">Cancel</a>
+	</div>
 	{% if error %}
 		<p class="error"><strong>Error:</strong> {{error}}</p>
 	{% endif %}
 </form>
-
-<a href="/">Go back</a>
-
 </body>
-
-
 </html>
