@@ -405,7 +405,7 @@ def staff_home():
 @app.route('/logout')
 def logout():
 	session.clear()
-	return redirect('/')
+	return redirect(url_for('login'))
 		
 app.secret_key = 'some key that you will never guess'
 
