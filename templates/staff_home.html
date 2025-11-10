@@ -18,8 +18,8 @@
   <header style="display:flex;align-items:center;justify-content:space-between;background:#111;color:#fff;padding:16px 20px">
     <h1 style="margin:0;font-size:18px">Airline Reservation</h1>
     <nav>
-      {% if session.get('email') %}
-        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('email') }}</span>
+      {% if session.get('display_name') %}
+        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('display_name') }}</span>
         <a href="/" style="color:#fff;text-decoration:none;margin-right:12px">Home</a>
         <a href="/logout" style="color:#fff;text-decoration:none">Logout</a>
       {% else %}
