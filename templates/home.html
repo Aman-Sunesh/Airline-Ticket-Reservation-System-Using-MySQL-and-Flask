@@ -46,11 +46,16 @@
     <h1>Airline Reservation</h1>
     <nav>
     {% if session.get('display_name') %}
-        <span class="muted">Hi, {{ session.get('display_name') }}</span>
-        <a href="/logout">Logout</a>
+        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('display_name') }}</span>
+        {% if session.get('role') == 'staff' %}
+          <a href="/staff_home" style="color:#fff;text-decoration:none;margin-right:12px">
+            Staff Dashboard
+          </a>
+        {% endif %}
+        <a href="/logout" style="color:#fff;text-decoration:none">Logout</a>
     {% else %}
-        <a href="/login">Login</a>
-        <a href="/register">Register</a>
+        <a href="/login" style="color:#fff;text-decoration:none;margin-right:12px">Login</a>
+        <a href="/register" style="color:#fff;text-decoration:none">Register</a>
     {% endif %}
     </nav>
   </header>
