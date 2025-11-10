@@ -45,8 +45,8 @@
   <header>
     <h1>Airline Reservation</h1>
     <nav>
-    {% if session.get('email') %}
-        <span class="muted">Hi, {{ session.get('email') }}</span>
+    {% if session.get('display_name') %}
+        <span class="muted">Hi, {{ session.get('display_name') }}</span>
         <a href="/logout">Logout</a>
     {% else %}
         <a href="/login">Login</a>
