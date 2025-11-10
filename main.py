@@ -92,13 +92,15 @@ def loginAuth():
 	cursor = conn.cursor()
 	
 	# Check if user exists in either customer or airline staff tab
-	query = """SELECT role, airline_name 
+	query = """SELECT role, airline_name, display_name 
 			FROM (
-				SELECT 'customer' AS role, NULL AS airline_name
-				FROM Customer WHERE email = %s AND password = MD5(%s)
+				SELECT 'customer' AS role, NULL AS airline_name, name AS display_name 
+				FROM Customer 
+				WHERE email = %s AND password = MD5(%s)
 				UNION ALL
-				SELECT 'staff' AS role, airline_name
-				FROM AirlineStaff WHERE email = %s AND password = MD5(%s)
+				SELECT 'staff' AS role, airline_name, CONCAT(first_name, ' ', last_name) AS display_name
+				FROM AirlineStaff 
+				WHERE email = %s AND password = MD5(%s)
 			) AS t
 			LIMIT 1
 		"""
@@ -114,6 +116,7 @@ def loginAuth():
 		# creates a session for the user
 		session['email'] = email                
 		session['role'] = data['role']   # 'customer' or 'staff'
+		session['display_name'] = data.get('display_name')
 		
 		if data['role'] == 'staff':
 			session['airline_name'] = data['airline_name']
