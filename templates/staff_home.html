@@ -4,28 +4,50 @@
   <meta charset="utf-8" />
   <title>Staff Dashboard — Airline Reservation</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
-    header{padding:18px 22px;background:#111;color:#fff}
-    main{max-width:900px;margin:28px auto;padding:0 16px}
+    :root { --bg:#f7f7fb; --card:#ffffff; --fg:#1c1c1c; --muted:#666; --border:#e6e6ea; --accent:#111; }
+    * { box-sizing:border-box }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:var(--bg);color:var(--fg)}
+    header{display:flex;align-items:center;justify-content:space-between;background:var(--accent);color:#fff;padding:16px 20px}
+    header h1{margin:0;font-size:18px;display:flex;align-items:center;gap:10px}
+    header img.logo{height:28px;background:#fff;border-radius:6px;padding:3px}
+    header nav a{color:#fff;text-decoration:none;margin-left:14px}
+    main{max-width:980px;margin:28px auto;padding:0 16px}
+
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
-    .card{display:block;padding:14px;border:1px solid #e6e6ea;border-radius:12px;background:#fff;text-decoration:none;color:inherit}
+    .card{display:block;padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff;text-decoration:none;color:inherit}
+
     table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
-    th,td{border:1px solid #e6e6ea;padding:8px;text-align:left}
-    .muted{color:#666}
+    th,td{border:1px solid var(--border);padding:8px;text-align:left;vertical-align:top}
+    th{background:#fafafa}
+    .muted{color:var(--muted)}
+    .actions a{font-size:.9em;text-decoration:none}
   </style>
 </head>
 <body>
-  <header style="display:flex;align-items:center;justify-content:space-between;background:#111;color:#fff;padding:16px 20px">
-    <h1 style="margin:0;font-size:18px">Airline Reservation</h1>
+  <header>
+    <h1>
+      Airline Reservation
+      {% if session.get('airline_name') %}
+        {# Map airline name to filename like "jetblue.png", "aircanada.png" #}
+        {% set logo_name = (session.get('airline_name')
+                            |lower
+                            |replace(' ','')
+                            |replace('&','and')
+                            |replace('.','')
+                            |replace('-','')) ~ '.png' %}
+        <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}"
+             alt="{{ session.get('airline_name') }} logo">
+      {% endif %}
+    </h1>
     <nav>
       {% if session.get('display_name') %}
         <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('display_name') }}</span>
-        <a href="/" style="color:#fff;text-decoration:none;margin-right:12px">Home</a>
-        <a href="/logout" style="color:#fff;text-decoration:none">Logout</a>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
       {% else %}
-        <a href="/" style="color:#fff;text-decoration:none;margin-right:12px">Home</a>
-        <a href="/login" style="color:#fff;text-decoration:none;margin-right:12px">Login</a>
-        <a href="/register" style="color:#fff;text-decoration:none">Register</a>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
       {% endif %}
     </nav>
   </header>
@@ -34,26 +56,41 @@
     <h2 style="margin:18px 6px 6px">
       Staff Dashboard{% if session.get('airline_name') %} · {{ session.get('airline_name') }}{% endif %}
     </h2>
+
+    <!-- All 7 staff features -->
     <div class="grid">
-      <a class="card" href="/create_flight">Create Flight</a>
-      <a class="card" href="/manage_flights">Manage Flights</a>
-      <a class="card" href="/view_customers">View Customers</a>
+      <a class="card" href="{{ url_for('staff_view_flights') }}">View Flights</a>
+      <a class="card" href="{{ url_for('create_flight_form') }}">Create Flight</a>
+      <a class="card" href="{{ url_for('staff_manage_status') }}">Manage Flight Status</a>
+      <a class="card" href="{{ url_for('add_airplane_form') }}">Add Airplane</a>
+      <a class="card" href="{{ url_for('list_my_airplanes') }}">My Airplanes</a>
+      <a class="card" href="{{ url_for('staff_ratings') }}">View Flight Ratings</a>
+      <a class="card" href="{{ url_for('staff_reports') }}">Reports</a>
     </div>
 
     <h3>Upcoming Flights (My Airline)</h3>
     {% if flights %}
       <table>
         <tr>
-          <th>Flight #</th><th>From</th><th>To</th><th>Departure</th><th>Status</th>
+          <th>Flight #</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Departure</th>
+          <th>Status</th>
+          <th class="actions">Actions</th>
         </tr>
         {% for f in flights %}
-        <tr>
-          <td>{{ f.flight_no }}</td>
-          <td>{{ f.src }}</td>
-          <td>{{ f.dst }}</td>
-          <td>{{ f.dep_datetime }}</td>
-          <td>{{ f.status }}</td>
-        </tr>
+          <tr>
+            <td>{{ f.flight_no }}</td>
+            <td>{{ f.src }}</td>
+            <td>{{ f.dst }}</td>
+            <td>{{ f.dep_datetime }}</td>
+            <td>{{ f.status }}</td>
+            <td class="actions">
+              <a href="{{ url_for('staff_manage_status') }}">Edit status</a> ·
+              <a href="{{ url_for('staff_view_flights') }}">View flights</a>
+            </td>
+          </tr>
         {% endfor %}
       </table>
     {% else %}
@@ -62,3 +99,4 @@
   </main>
 </body>
 </html>
+
