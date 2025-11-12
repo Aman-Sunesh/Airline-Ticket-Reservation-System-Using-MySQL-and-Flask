@@ -1,0 +1,31 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Flight Ratings — Airline Reservation</title>
+<style>
+:root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
+main{max-width:900px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
+table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:#fafafa}
+.muted{color:#666}
+</style></head><body>
+<header><div>Airline Reservation</div><nav><a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a></nav></header>
+<main><div class="card">
+  <h2 style="margin:0 0 10px 0;">Flight Ratings</h2>
+  {% if flights %}
+    <table><tr>
+      <th>Flight</th><th>From → To</th><th>Departure</th><th>Avg Rating</th><th>Reviews</th><th>Details</th>
+    </tr>
+    {% for f in flights %}
+      <tr>
+        <td><strong>{{ f.flight_no }}</strong></td>
+        <td>{{ f.dep_airport_code }} → {{ f.arr_airport_code }}</td>
+        <td>{{ f.dep_disp }}</td>
+        <td>{{ f.avg_rating if f.avg_rating is not none else '—' }}</td>
+        <td>{{ f.num_reviews }}</td>
+        <td><a href="{{ url_for('staff_ratings_detail', flight_no=f.flight_no, dep_dt_key=f.dep_key) }}">View comments</a></td>
+      </tr>
+    {% endfor %}</table>
+  {% else %}<p class="muted">No flights found.</p>{% endif %}
+</div></main></body></html>
