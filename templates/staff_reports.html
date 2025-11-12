@@ -1,0 +1,50 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Reports — Airline Reservation</title>
+<style>
+:root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
+main{max-width:980px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600}
+input{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:#fafafa}
+.bar{height:16px;background:#111}
+</style></head><body>
+<header><div>Airline Reservation</div><nav><a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a></nav></header>
+<main>
+  <div class="card">
+    <h2 style="margin:0 0 10px 0;">Reports — Tickets Sold</h2>
+    <form class="grid" method="get" action="{{ url_for('staff_reports') }}">
+      <label><span>From date</span><input type="date" name="from_date" value="{{ from_date }}"></label>
+      <label><span>To date</span><input type="date" name="to_date" value="{{ to_date }}"></label>
+      <div><button class="btn primary" type="submit">Apply</button>
+           <a class="btn" href="{{ url_for('staff_reports') }}">Reset</a></div>
+    </form>
+
+    <div style="margin-top:10px;">
+      <strong>Total tickets:</strong> {{ totals.total_tickets or 0 }}
+    </div>
+
+    {% if monthly %}
+      <table>
+        <tr><th>Month</th><th>Tickets</th><th>Bar</th></tr>
+        {% set maxv = (monthly|map(attribute='cnt')|list|max) %}
+        {% for m in monthly %}
+          {% set w = ( (m.cnt / (maxv if maxv>0 else 1) ) * 100 )|round(0,'floor') %}
+          <tr>
+            <td>{{ m.ym }}</td>
+            <td>{{ m.cnt }}</td>
+            <td><div class="bar" style="width:{{ w }}%"></div></td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p style="color:#666">No ticket sales in the selected range.</p>
+    {% endif %}
+  </div>
+</main></body></html>
