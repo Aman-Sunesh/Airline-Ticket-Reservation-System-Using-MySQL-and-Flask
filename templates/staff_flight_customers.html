@@ -1,0 +1,20 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Flight Customers — Airline Reservation</title>
+<style>
+:root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
+main{max-width:800px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
+table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:#fafafa}
+</style></head><body>
+<header><div>Airline Reservation</div><nav><a style="color:#fff" href="{{ url_for('staff_view_flights') }}">Back</a></nav></header>
+<main><div class="card">
+  <h2 style="margin:0 0 8px 0;">Customers · {{ flight_no }} · {{ dep_dt_key }}</h2>
+  {% if customers %}
+    <table><tr><th>Name</th><th>Email</th><th>Purchased</th></tr>
+    {% for r in customers %}<tr><td>{{ r.name }}</td><td>{{ r.email }}</td><td>{{ r.purchase_datetime }}</td></tr>{% endfor %}
+    </table>
+  {% else %}<p>No customers for this flight.</p>{% endif %}
+</div></main></body></html>
