@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"/><title>View Flights — Airline Reservation</title>
+<style>
+:root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--muted:#666;--border:#e6e6ea;--accent:#111}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--accent);color:#fff}
+header h1{margin:0;font-size:18px} header nav a{color:#fff;text-decoration:none;margin-left:14px}
+main{max-width:980px;margin:28px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600}
+input,select{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+th,td{border:1px solid var(--border);padding:8px;text-align:left;vertical-align:top}
+th{background:#fafafa}.muted{color:var(--muted)}
+</style></head><body>
+<header>
+  <h1>Airline Reservation</h1>
+  <nav>
+    <a href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h2 style="margin:0 0 10px 0;">View Flights{% if session.get('airline_name') %} · {{ session.get('airline_name') }}{% endif %}</h2>
+    <form class="grid" method="get" action="{{ url_for('staff_view_flights') }}">
+      <label><span>From date</span><input type="date" name="from_date" value="{{ current_filters.from_date }}"></label>
+      <label><span>To date</span><input type="date" name="to_date" value="{{ current_filters.to_date }}"></label>
+      <label><span>From airport</span>
+        <select name="dep_code"><option value="">Any</option>
+          {% for code in airports or [] %}<option value="{{ code }}" {% if code==current_filters.dep_code %}selected{% endif %}>{{ code }}</option>{% endfor %}
+        </select>
+      </label>
+      <label><span>To airport</span>
+        <select name="arr_code"><option value="">Any</option>
+          {% for code in airports or [] %}<option value="{{ code }}" {% if code==current_filters.arr_code %}selected{% endif %}>{{ code }}</option>{% endfor %}
+        </select>
+      </label>
+      <div><button class="btn primary" type="submit">Apply</button>
+           <a class="btn" href="{{ url_for('staff_view_flights') }}">Reset</a></div>
+    </form>
+
+    {% if flights %}
+      <table>
+        <thead><tr>
+          <th>Flight</th><th>From → To</th><th>Departure</th><th>Arrival</th><th>Status</th><th>Customers</th>
+        </tr></thead><tbody>
+        {% for f in flights %}
+          <tr>
+            <td><strong>{{ f.flight_no }}</strong><div class="muted">{{ f.airline_name }}</div></td>
+            <td>{{ f.dep_airport_code }} → {{ f.arr_airport_code }}</td>
+            <td>{{ f.dep_disp }}</td>
+            <td>{{ f.arr_disp }}</td>
+            <td>{{ f.status }}</td>
+            <td>
+              <a href="{{ url_for('staff_flight_customers', flight_no=f.flight_no, dep_dt_key=f.dep_key) }}">View customers</a> ·
+              <a href="{{ url_for('staff_manage_status', from_date=current_filters.from_date, to_date=current_filters.to_date, dep_code=current_filters.dep_code, arr_code=current_filters.arr_code) }}">Edit status</a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No flights found for the selected filters.</p>
+    {% endif %}
+  </div>
+</main></body></html>
