@@ -25,7 +25,7 @@ AIRPORT_TZ = {
     'LHR': 'Europe/London',
     'PVG': 'Asia/Shanghai',
     'DXB': 'Asia/Dubai',
-    'AUH': 'Asia/Abu Dhabi',
+    'AUH': 'Asia/Dubai',
     'SYD': 'Australia/Sydney',
 }
 
