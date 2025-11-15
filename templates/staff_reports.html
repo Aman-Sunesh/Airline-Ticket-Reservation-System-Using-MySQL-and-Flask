@@ -13,7 +13,7 @@ input{padding:10px 12px;border:1px solid var(--border);border-radius:10px;backgr
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
 th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:#fafafa}
-.bar{height:16px;background:#111}
+.bar{height:16px;background:#111;width:calc(var(--w, 0) * 1%)}
 </style></head><body>
 <header><div>Airline Reservation</div><nav><a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a></nav></header>
 <main>
@@ -39,7 +39,7 @@ th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:
           <tr>
             <td>{{ m.ym }}</td>
             <td>{{ m.cnt }}</td>
-            <td><div class="bar" style="width:{{ w }}%"></div></td>
+            <td><div class="bar" style="--w: {{ (w|default(0))|int }};"></div></td>
           </tr>
         {% endfor %}
       </table>
