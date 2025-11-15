@@ -660,31 +660,95 @@ def staff_update_status():
 @app.get("/staff/add_airplane")
 def add_airplane_form():
     guard = _require_staff()
-    if guard: return guard
-    return render_template("add_airplane.html")
+    if guard:
+        return guard
+
+    # Map full airline name -> code used in airplane_id
+    airline_name = session.get("airline_name")
+    airline_code_map = {
+        "Jet Blue": "JB",
+        "British Airways": "BA",
+        "Etihad Airways": "EY",
+        "Emirates": "EK",
+        "United Airlines": "UA",
+        "Delta Air Lines": "DL",
+        "Air Canada": "AC",
+        "American Airlines": "AA",
+    }
+
+    # Fallback: first two letters uppercased if not in the map
+    airline_code = airline_code_map.get(
+        airline_name,
+        (airline_name or "XX")[:2].upper()
+    )
+
+    return render_template(
+        "add_airplane.html",
+        airline_code=airline_code
+    )
+
 
 @app.post("/staff/add_airplane")
 def add_airplane_submit():
     guard = _require_staff()
-    if guard: return guard
-    a = session['airline_name']
-    plane_id = request.form['airplane_id'].strip()
-    seats    = int(request.form['seat_capacity'])
-    make     = request.form['manufacturer'].strip()
-    age      = int(request.form['age'])
+    if guard:
+        return guard
 
+    a = session["airline_name"]
+
+    # ---- read form fields ----
+    prefix       = request.form.get("prefix", "").strip().upper()
+    airline_code = request.form.get("airline_code", "").strip().upper()
+    model_number = request.form.get("model_number", "").strip()
+    seats_raw    = request.form.get("seats", "").strip()
+    age_raw      = request.form.get("age", "").strip()
+
+    # ---- basic validation ----
+    # manufacturer must be A / B / E
+    manufacturer_map = {
+        "A": "Airbus",
+        "B": "Boeing",
+        "E": "Embraer",
+    }
+    manufacturer = manufacturer_map.get(prefix)
+    if not manufacturer:
+        flash("Please choose a valid manufacturer prefix (A/B/E).", "error")
+        return redirect(url_for("add_airplane_form"))
+
+    if not model_number.isdigit():
+        flash("Model number must be digits only.", "error")
+        return redirect(url_for("add_airplane_form"))
+
+    try:
+        seats = int(seats_raw)
+        age   = int(age_raw)
+    except ValueError:
+        flash("Seats and age must be valid numbers.", "error")
+        return redirect(url_for("add_airplane_form"))
+
+    # ---- build airplane_id like A320-JB2, A321-BA1, etc. ----
+    airplane_id = f"{prefix}{model_number}-{airline_code}"
+
+    # ---- insert into DB ----
     c = conn.cursor()
     try:
-        c.execute("""
-          INSERT INTO airplane(airplane_id, airline_name, seat_capacity, manufacturer, age)
-          VALUES (%s,%s,%s,%s,%s)
-        """,(plane_id,a,seats,make,age))
-        conn.commit(); flash("Airplane added.","success")
+        c.execute(
+            """
+            INSERT INTO airplane (airplane_id, airline_name, seat_capacity, manufacturer, age)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (airplane_id, a, seats, manufacturer, age),
+        )
+        conn.commit()
+        flash(f"Airplane {airplane_id} added.", "success")
     except Exception:
-        conn.rollback(); flash("Error adding airplane.","error")
+        conn.rollback()
+        flash("Error adding airplane.", "error")
     finally:
         c.close()
+
     return redirect(url_for("list_my_airplanes"))
+
 
 @app.get("/staff/airplanes")
 def list_my_airplanes():
