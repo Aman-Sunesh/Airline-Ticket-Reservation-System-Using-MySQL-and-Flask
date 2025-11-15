@@ -1,28 +1,83 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"/>
-<title>Add Airplane — Airline Reservation</title>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Add Airplane</title>
 <style>
 :root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
-main{max-width:700px;margin:28px auto;padding:0 16px}
-.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
-label{display:flex;flex-direction:column;gap:6px;font-weight:600}
-input{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
-.btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-</style></head><body>
-<header><div>Airline Reservation</div><nav><a style="color:#fff" href="{{ url_for('list_my_airplanes') }}">My Airplanes</a></nav></header>
-<main><div class="card">
-  <h2 style="margin:0 0 10px 0;">Add Airplane</h2>
-  <form method="post" action="{{ url_for('add_airplane_submit') }}">
-    <div class="grid">
-      <label><span>Airplane ID</span><input name="airplane_id" required></label>
-      <label><span>Seat Capacity</span><input type="number" min="1" name="seat_capacity" required></label>
-      <label><span>Manufacturer</span><input name="manufacturer" required></label>
-      <label><span>Age (years)</span><input type="number" min="0" name="age" required></label>
-    </div>
-    <div style="margin-top:10px"><button class="btn primary" type="submit">Add</button>
-      <a class="btn" href="{{ url_for('staff_home') }}">Cancel</a></div>
-  </form>
-</div></main></body></html>
+header{background:#111;color:#fff;padding:16px 20px;display:flex;justify-content:space-between}
+main{max-width:800px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+label{display:flex;flex-direction:column;font-weight:600;gap:6px}
+input,select{padding:10px;border:1px solid var(--border);border-radius:10px}
+.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer}
+.btn.primary{background:#111;color:#fff;border-color:#111}
+</style>
+</head>
+<body>
+
+<header>
+  <div>Airline Reservation</div>
+  <nav><a href="{{ url_for('staff_home') }}" style="color:#fff">Staff Dashboard</a></nav>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Add Airplane</h2>
+
+    <form method="post" action="{{ url_for('add_airplane_submit') }}">
+      <div class="grid">
+
+        <!-- PREFIX: Airbus/Boeing/Embraer -->
+        <label>
+          <span>Manufacturer Prefix</span>
+          <select name="prefix" required>
+            <option value="">Select</option>
+            <option value="A">Airbus</option>
+            <option value="B">Boeing</option>
+            <option value="E">Embraer</option>
+          </select>
+        </label>
+
+        <!-- Airline code auto-filled depending on staff airline -->
+        <label>
+          <span>Airline Code</span>
+          <input type="text" name="airline_code" 
+                 value="{{ airline_code }}"
+                 readonly>
+        </label>
+
+        <!-- Numeric model -->
+        <label>
+          <span>Model Number</span>
+          <input type="text" name="model_number"
+                 pattern="\d{1,3}" maxlength="3" required
+                 title="Only 1–3 digits allowed">
+        </label>
+
+        <!-- Seats -->
+        <label>
+          <span># Seats</span>
+          <input type="number" name="seats" min="1" required>
+        </label>
+
+        <!-- Age -->
+        <label>
+          <span>Age (years)</span>
+          <input type="number" name="age" min="0" required>
+        </label>
+
+      </div>
+
+      <div style="margin-top:14px">
+        <button class="btn primary" type="submit">Add</button>
+        <a class="btn" href="{{ url_for('staff_home') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</main>
+
+</body>
+</html>
