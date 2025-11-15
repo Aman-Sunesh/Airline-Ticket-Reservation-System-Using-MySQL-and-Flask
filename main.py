@@ -401,13 +401,13 @@ def _parse_date(s):
 
 @app.get("/")
 def home():
-	airports = get_airport_codes()
-	return render_template(
-		"home.html",
-		username=session.get("email"),
-		role=session.get("role"),
-		airports=airports,
-	)
+    airports = get_airport_codes()
+    return render_template(
+        "home.html",
+        username=session.get("email"),
+        role=session.get("role"),
+        airports=airports,
+    )
 
 @app.route('/customer_home')
 def customer_home():
@@ -468,9 +468,9 @@ def staff_view_flights():
     sql = f"""
         SELECT flight_no, airline_name,
                dep_airport_code, arr_airport_code,
-               DATE_FORMAT(dep_datetime,'%Y-%m-%d %H:%i:%s') AS dep_key,
-               DATE_FORMAT(dep_datetime,'%M %e, %Y %l:%i %p') AS dep_disp,
-               DATE_FORMAT(arr_datetime,'%M %e, %Y %l:%i %p') AS arr_disp,
+               DATE_FORMAT(dep_datetime,'%%Y-%%m-%%d %%H:%%i:%%s') AS dep_key,
+               DATE_FORMAT(dep_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS dep_disp,
+               DATE_FORMAT(arr_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS arr_disp,
                status, base_price
         FROM flight
         WHERE {' AND '.join(conds)}
@@ -533,13 +533,32 @@ def create_flight_submit():
     if guard: return guard
     a = session['airline_name']
 
-    fno   = request.form['flight_no'].strip()
-    depdt = request.form['dep_datetime'].strip()    # 'YYYY-MM-DD HH:MM'
-    arrdt = request.form['arr_datetime'].strip()
-    dep   = request.form['dep_airport_code'].strip().upper()
-    arr   = request.form['arr_airport_code'].strip().upper()
+    fno = request.form['flight_no'].strip().upper()
+    a = session['airline_name']
+
+    # New: separate date + time fields from the form
+    dep_date = request.form['dep_date'].strip()
+    dep_time = request.form['dep_time'].strip()
+    arr_date = request.form['arr_date'].strip()
+    arr_time = request.form['arr_time'].strip()
+
+    dep = request.form['dep_airport_code'].strip().upper()
+    arr = request.form['arr_airport_code'].strip().upper()
     plane = request.form['airplane_id'].strip()
     price = request.form['base_price'].strip()
+
+    # Combine into full datetimes and validate
+    try:
+        dep_dt_obj = datetime.strptime(f"{dep_date} {dep_time}", "%Y-%m-%d %H:%M")
+        arr_dt_obj = datetime.strptime(f"{arr_date} {arr_time}", "%Y-%m-%d %H:%M")
+    except ValueError:
+        flash("Invalid departure or arrival date/time.", "error")
+        return redirect(url_for("create_flight_form"))
+
+    # Store as 'YYYY-MM-DD HH:MM:SS' for MySQL
+    depdt = dep_dt_obj.strftime("%Y-%m-%d %H:%M:%S")
+    arrdt = arr_dt_obj.strftime("%Y-%m-%d %H:%M:%S")
+
 
     c = conn.cursor()
     # airplane must be owned by this airline
@@ -587,9 +606,9 @@ def staff_manage_status():
     query = f"""
         SELECT flight_no, airline_name,
                dep_airport_code, arr_airport_code,
-               DATE_FORMAT(dep_datetime,'%Y-%m-%d %H:%i:%s') AS dep_dt_key,
-               DATE_FORMAT(dep_datetime,'%M %e, %Y %l:%i %p') AS dep_dt_disp,
-               DATE_FORMAT(arr_datetime,'%M %e, %Y %l:%i %p') AS arr_dt_disp,
+               DATE_FORMAT(dep_datetime,'%%Y-%%m-%%d %%H:%%i:%%s') AS dep_dt_key,
+               DATE_FORMAT(dep_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS dep_dt_disp,
+               DATE_FORMAT(arr_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS arr_dt_disp,
                status, base_price
         FROM flight
         WHERE {' AND '.join(conditions)}
@@ -687,8 +706,8 @@ def staff_ratings():
     c = conn.cursor()
     c.execute("""
       SELECT f.flight_no,
-             DATE_FORMAT(f.dep_datetime,'%Y-%m-%d %H:%i:%s') AS dep_key,
-             DATE_FORMAT(f.dep_datetime,'%M %e, %Y %l:%i %p') AS dep_disp,
+             DATE_FORMAT(f.dep_datetime,'%%Y-%%m-%%d %%H:%%i:%%s') AS dep_key,
+             DATE_FORMAT(f.dep_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS dep_disp,
              f.dep_airport_code, f.arr_airport_code,
              ROUND(AVG(fr.rating),2) AS avg_rating, COUNT(fr.rating) AS num_reviews
       FROM flight f
@@ -741,7 +760,7 @@ def staff_reports():
     c.execute(f"SELECT COUNT(*) AS total_tickets FROM ticket t WHERE {where}", params)
     totals = c.fetchone()
     c.execute(f"""
-      SELECT DATE_FORMAT(t.purchase_datetime,'%Y-%m') AS ym, COUNT(*) AS cnt
+      SELECT DATE_FORMAT(t.purchase_datetime,'%%Y-%%m') AS ym, COUNT(*) AS cnt
       FROM ticket t
       WHERE {where}
       GROUP BY ym ORDER BY ym
@@ -752,6 +771,7 @@ def staff_reports():
                            totals=totals, monthly=monthly,
                            from_date=from_date or "", to_date=to_date or "")
 # ================= End Staff Features =======================================
+
 
 
 @app.route('/logout')
