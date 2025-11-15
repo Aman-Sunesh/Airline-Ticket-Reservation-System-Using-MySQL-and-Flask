@@ -28,10 +28,10 @@
     <h1>
       Airline Reservation
       {% if session.get('airline_name') %}
-        {# Map airline name to filename like "jetblue.png", "aircanada.png" #}
+        {# Map airline name to filename like "air_canada.png", "jet_blue.png" (same rule as home.html) #}
         {% set logo_name = (session.get('airline_name')
                             |lower
-                            |replace(' ','')
+                            |replace(' ', '_')
                             |replace('&','and')
                             |replace('.','')
                             |replace('-','')) ~ '.png' %}
@@ -99,4 +99,3 @@
   </main>
 </body>
 </html>
-
