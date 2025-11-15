@@ -1,8 +1,12 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="utf-8"/><title>Create Flight — Airline Reservation</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Create Flight — Airline Reservation</title>
 <style>
 :root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
-*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
 header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
 main{max-width:800px;margin:28px auto;padding:0 16px}
 .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
@@ -11,35 +15,92 @@ label{display:flex;flex-direction:column;gap:6px;font-weight:600}
 input,select{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
 .btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-</style></head><body>
-<header><div>Airline Reservation</div><nav>
-  <a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a>
-</nav></header>
-<main><div class="card">
-  <h2 style="margin:0 0 10px 0;">Create Flight</h2>
-  <form method="post" action="{{ url_for('create_flight_submit') }}">
-    <div class="grid">
-      <label><span>Flight #</span><input name="flight_no" required maxlength="10"></label>
-      <label><span>Airplane</span>
-        <select name="airplane_id" required>
-          {% for p in planes %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-        </select>
-      </label>
-      <label><span>Depart (YYYY-MM-DD HH:MM)</span><input name="dep_datetime" required placeholder="2025-12-01 09:30"></label>
-      <label><span>Arrive (YYYY-MM-DD HH:MM)</span><input name="arr_datetime" required placeholder="2025-12-01 12:40"></label>
-      <label><span>From</span>
-        <select name="dep_airport_code" required>
-          {% for a in airports %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
-        </select>
-      </label>
-      <label><span>To</span>
-        <select name="arr_airport_code" required>
-          {% for a in airports %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
-        </select>
-      </label>
-      <label><span>Base price (USD)</span><input name="base_price" type="number" min="0" step="0.01" required></label>
-    </div>
-    <div style="margin-top:10px"><button class="btn primary" type="submit">Create</button>
-      <a class="btn" href="{{ url_for('staff_view_flights') }}">Cancel</a></div>
-  </form>
-</div></main></body></html>
+</style>
+</head>
+<body>
+
+<header>
+  <div>Airline Reservation</div>
+  <nav>
+    <a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <h2 style="margin:0 0 10px 0;">Create Flight</h2>
+
+    <form method="post" action="{{ url_for('create_flight_submit') }}">
+      <div class="grid">
+
+        <label>
+          <span>Flight #</span>
+          <input name="flight_no" required maxlength="10">
+        </label>
+
+        <label>
+          <span>Airplane</span>
+          <select name="airplane_id" required>
+            {% for p in planes %}
+              <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <!-- NEW: date + time pickers -->
+        <label>
+          <span>Departure date</span>
+          <input type="date" name="dep_date" required>
+        </label>
+
+        <label>
+          <span>Departure time</span>
+          <input type="time" name="dep_time" required step="60">
+        </label>
+
+        <label>
+          <span>Arrival date</span>
+          <input type="date" name="arr_date" required>
+        </label>
+
+        <label>
+          <span>Arrival time</span>
+          <input type="time" name="arr_time" required step="60">
+        </label>
+
+        <label>
+          <span>From</span>
+          <select name="dep_airport_code" required>
+            {% for a in airports %}
+              <option value="{{ a }}">{{ a }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>
+          <span>To</span>
+          <select name="arr_airport_code" required>
+            {% for a in airports %}
+              <option value="{{ a }}">{{ a }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>
+          <span>Base price (USD)</span>
+          <input name="base_price" type="number" min="0" step="0.01" required>
+        </label>
+
+      </div>
+
+      <div style="margin-top:10px">
+        <button class="btn primary" type="submit">Create</button>
+        <a class="btn" href="{{ url_for('staff_home') }}">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</main>
+
+</body>
+</html>
