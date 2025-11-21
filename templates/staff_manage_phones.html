@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Phone Numbers</title>
+    <style>
+        body { font-family: system-ui; background:#f7f7fb; margin:0; padding:0; }
+        header { background:#111; color:white; padding:15px 20px;
+                 display:flex; justify-content:space-between; }
+        a { text-decoration:none; color:#0077cc; }
+        .container { max-width:700px; margin:30px auto; background:white;
+                     padding:20px; border-radius:10px; }
+        table { width:100%; border-collapse:collapse; margin-top:20px; }
+        th,td { padding:10px; border-bottom:1px solid #ddd; }
+        button { background:#d33; color:white; border:none;
+                 padding:5px 10px; border-radius:5px; cursor:pointer; }
+        button:hover { background:#b00; }
+    </style>
+</head>
+
+<body>
+<header>
+    <h2>Manage Phone Numbers</h2>
+    <a href="/staff_home" style="color:white;">Back to Dashboard</a>
+</header>
+
+<div class="container">
+
+    <h3>Your Phone Numbers</h3>
+
+    {% if phones %}
+    <table>
+        <tr><th>Phone Number</th><th>Action</th></tr>
+        {% for p in phones %}
+        <tr>
+            <td>{{ p.phone_number }}</td>
+            <td>
+                <form method="POST" action="/staff/phones/delete" style="display:inline;">
+                    <input type="hidden" name="phone_number" value="{{ p.phone_number }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No phone numbers added yet.</p>
+    {% endif %}
+
+    <h3 style="margin-top:30px;">Add New Phone Number</h3>
+
+    <form method="POST" action="/staff/phones/add">
+        <input type="text" name="phone_number" placeholder="Enter phone number"
+               style="padding:10px; width:70%;">
+        <button type="submit" style="background:#28a745; margin-left:10px;">Add</button>
+    </form>
+
+</div>
+
+</body>
+</html>
