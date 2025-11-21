@@ -5,57 +5,223 @@
   <title>Customer Dashboard — Airline Reservation</title>
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f7f7fb;color:#1c1c1c}
-    header{padding:18px 22px;background:#111;color:#fff}
-    main{max-width:900px;margin:28px auto;padding:0 16px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+    header{display:flex;align-items:center;justify-content:space-between;background:#111;color:#fff;padding:16px 20px}
+    header h1{margin:0;font-size:18px}
+    header nav a{color:#fff;text-decoration:none;margin-left:14px}
+    header nav .nav-greeting{
+      opacity:.85;
+      margin-right:12px;
+      font-size:16px;
+    }
+    main{max-width:980px;margin:28px auto;padding:0 16px}
+    .actions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
+    .action-card{display:block;padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff;
+                 text-decoration:none;color:inherit;font-weight:600;text-align:center}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}  
     .btn{padding:10px 14px;border:1px solid #e6e6ea;border-radius:10px;background:#fff;text-decoration:none;color:inherit}
     .btn.primary{background:#111;color:#fff;border-color:#111}
     table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
     th,td{border:1px solid #e6e6ea;padding:8px;text-align:left}
     .muted{color:#666}
+    :root { --bg:#f7f7fb; --card:#ffffff; --fg:#1c1c1c; --muted:#666; --border:#e6e6ea; --accent:#111; }
+    *{box-sizing:border-box}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+    form{display:flex;flex-direction:column;gap:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    label{display:flex;flex-direction:column;gap:6px;font-weight:600}
+    input,select{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .result-list{display:flex;flex-direction:column;gap:12px}
+    .flight{display:flex;align-items:center;gap:16px;border:1px solid var(--border);border-radius:12px;padding:14px}
+    .flight .left{display:flex;align-items:center;gap:12px;min-width:220px}
+    .flight .logo{width:40px;height:40px;border-radius:50%;object-fit:contain;border:1px solid var(--border);background:#fff}
+    .flight .bigtime{font-weight:800;font-size:28px;line-height:1}
+    .flight .tiny{color:var(--muted);font-size:14px}
+    .flight .mid{flex:1;display:flex;flex-direction:column;align-items:center}
+    .track{position:relative;height:2px;background:var(--border);width:160px;margin:6px 0}
+    .dot{position:absolute;top:-4px;width:10px;height:10px;border:2px solid var(--border);background:#fff;border-radius:50%}
+    .dot.start{left:0}
+    .dot.end{right:0}
+    .pill{border:1px solid #cfd1d5;border-radius:6px;padding:4px 8px;font-weight:600}
+    .flight .meta{color:var(--muted);font-size:13px}
+    .flight .airline{font-size:14px;font-weight:600;margin-top:6px}
+    .flight .right{text-align:right;min-width:140px}
+    .flight .price{font-weight:800;font-size:18px;margin-top:6px}
+    .badge{display:inline-block;background:#e9f7ec;color:#157f3b;padding:6px 10px;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:8px}
   </style>
 </head>
 <body>
-  <header style="display:flex;align-items:center;justify-content:space-between;background:#111;color:#fff;padding:16px 20px">
-    <h1 style="margin:0;font-size:18px">Airline Reservation</h1>
+  <header>
+    <h1>Airline Reservation</h1>
     <nav>
     {% if session.get('display_name') %}
-        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('display_name') }}</span>
-        <a href="/logout" style="color:#fff;text-decoration:none">Logout</a>
+        <span class="nav-greeting">Hi, {{ session.get('display_name') }}</span>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
     {% else %}
-        <a href="/login" style="color:#fff;text-decoration:none;margin-right:12px">Login</a>
-        <a href="/register" style="color:#fff;text-decoration:none">Register</a>
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
     {% endif %}
     </nav>
   </header>
 
   <main>
-    <div class="actions">
-      <a class="btn primary" href="/search_flights">Search Flights</a>
-      <a class="btn" href="/my_tickets">My Tickets</a>
-      <a class="btn" href="/rate_flight">Rate a Flight</a>
-      <a class="btn" href="/logout">Logout</a>
+    <h2 style="margin:18px 6px 6px">Customer Dashboard</h2>
+    <div class="actions-grid">
+      <a class="action-card" href="/customer/upcoming_flights">View Upcoming Flights</a>
+      <a class="action-card" href="/customer/past_flights">View Past Flights</a>
+      <a class="action-card" href="/customer/rate_flight">Rate Previous Flights</a>
+    </div>
+    <div class="card" id="search-flights">
+      <h2 style="margin-top:0;">Search Flights</h2>
+      <form action="/search_flights" method="GET" id="customer-search-form">
+        {% set t = request.args.get('trip', trip|default('oneway')) %}
+        <div class="row" role="group" aria-label="Trip type">
+          <label class="row" style="font-weight:600;gap:8px;">
+            <input type="radio" name="trip" value="oneway" {% if t != 'round' %}checked{% endif %}> One-way
+          </label>
+          <label class="row" style="font-weight:600;gap:8px;">
+            <input type="radio" name="trip" value="round"  {% if t == 'round' %}checked{% endif %}> Round-trip
+          </label>
+        </div>
+
+        <div class="grid">
+          <label>
+            <span>From</span>
+            <select name="source" required aria-label="From airport">
+              <option value="" disabled selected>— Select airport —</option>
+              {% for code in airports or [] %}
+                <option value="{{ code }}"
+                  {% if request.args.get('source','') == code %}selected{% endif %}>
+                  {{ code }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>
+            <span>To</span>
+            <select name="destination" required aria-label="To airport">
+              <option value="" disabled selected>— Select airport —</option>
+              {% for code in airports or [] %}
+                <option value="{{ code }}"
+                  {% if request.args.get('destination','') == code %}selected{% endif %}>
+                  {{ code }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+
+        <div class="grid">
+          <label>
+            <span>Departure date</span>
+            <input type="date" name="depart_date" required
+                   value="{{ request.args.get('depart_date', depart_date|default('')) }}">
+          </label>
+          <label id="return-date-wrap" {% if t=='round' %}style=""{% else %}style="display:none;"{% endif %}>
+            <span>Return date</span>
+            <input type="date" name="return_date"
+                   value="{{ request.args.get('return_date', return_date|default('')) }}">
+          </label>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" type="submit">Search</button>
+          <button class="btn" type="button" id="clear-btn">Clear</button>
+        </div>
+      </form>
     </div>
 
-    <h3>Your Upcoming Flights</h3>
-    {% if tickets %}
-      <table>
-        <tr>
-          <th>Flight #</th><th>From</th><th>To</th><th>Departure</th><th>Status</th>
-        </tr>
-        {% for t in tickets %}
-        <tr>
-          <td>{{ t.flight_no }}</td>
-          <td>{{ t.src }}</td>
-          <td>{{ t.dst }}</td>
-          <td>{{ t.dep_datetime }}</td>
-          <td>{{ t.status }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-    {% else %}
-      <p class="muted">No bookings yet.</p>
+    {% if error %}
+      <div id="error-block" class="card" style="margin-top:16px; color:#b00020;">
+        {{ error }}
+      </div>
     {% endif %}
+    <div id="search-results">
+    {% if outbound is defined %}
+      <div class="card" style="margin-top:16px;">
+        <h3 style="margin:0 0 10px 0;">Outbound flights</h3>
+        <div class="result-list">
+          {% for r in outbound %}
+            <article class="flight">
+              <div class="left">
+                {% set logo_name = (r.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+                <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}" alt="{{ r.airline_name }}">
+                <div>
+                  <div class="bigtime">{{ r.d_time }}</div>
+                  <div class="tiny">{{ r.dep_airport_code }} · {{ r.d_date }}</div>
+                </div>
+              </div>
+
+              <div class="mid">
+                {% if r.flexible|default(false) %}
+                  <div class="badge">Flexible ticket upgrade available</div>
+                {% endif %}
+                <div class="track">
+                  <span class="dot start"></span>
+                  <span class="dot end"></span>
+                </div>
+                <div class="pill">{{ r.stops_text|default('Direct') }}</div>
+                <div class="meta">{{ r.flight_duration }}</div>
+                <div class="airline">{{ r.airline_name }}{% if r.operated_by is defined %}, operated by {{ r.operated_by }}{% endif %} · <strong>{{ r.flight_no }}</strong></div>
+              </div>
+
+              <div class="right">
+                <div class="bigtime">{{ r.a_time }}</div>
+                <div class="tiny">{{ r.arr_airport_code }} · {{ r.a_date }}</div>
+                <div class="price">${{ '%.2f'|format(r.base_price) }}</div>
+              </div>
+            </article>
+          {% else %}
+            <p class="muted">No flights found.</p>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if inbound is defined and inbound %}
+    <div class="card" style="margin-top:16px;">
+        <h3 style="margin:0 0 10px 0;">Return flights</h3>
+        <div class="result-list">
+        {% for r in inbound %}
+            <article class="flight">
+            <div class="left">
+                {% set logo_name = (r.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+                <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}" alt="{{ r.airline_name }}">
+                <div>
+                <div class="bigtime">{{ r.d_time }}</div>
+                <div class="tiny">{{ r.dep_airport_code }} · {{ r.d_date }}</div>
+                </div>
+            </div>
+
+            <div class="mid">
+                {% if r.flexible|default(false) %}
+                <div class="badge">Flexible ticket upgrade available</div>
+                {% endif %}
+                <div class="track">
+                <span class="dot start"></span>
+                <span class="dot end"></span>
+                </div>
+                <div class="pill">{{ r.stops_text|default('Direct') }}</div>
+                <div class="meta">{{ r.flight_duration }}</div>
+                <div class="airline">
+                {{ r.airline_name }}{% if r.operated_by is defined %}, operated by {{ r.operated_by }}{% endif %} ·
+                <strong>{{ r.flight_no }}</strong>
+                </div>
+            </div>
+
+            <div class="right">
+                <div class="bigtime">{{ r.a_time }}</div>
+                <div class="tiny">{{ r.arr_airport_code }} · {{ r.a_date }}</div>
+                <div class="price">${{ '%.2f'|format(r.base_price) }}</div>
+            </div>
+            </article>
+        {% else %}
+            <p class="muted">No return flights found.</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    </div>
   </main>
 </body>
 </html>
