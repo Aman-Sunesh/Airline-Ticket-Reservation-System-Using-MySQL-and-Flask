@@ -415,7 +415,6 @@ def customer_home():
 
 @app.route('/staff_home')
 def staff_home():
-    # protect staff dashboard; bounce non-staff to login
     if session.get('role') != 'staff':
         return redirect(url_for('login'))
 
@@ -438,7 +437,9 @@ def staff_home():
     flights = c.fetchall()
     c.close()
 
-    return render_template('staff_home.html', flights=flights)
+    # note airline_name=airline here
+    return render_template('staff_home.html', flights=flights, airline_name=airline)
+
 
 # ================= Staff Features — Use Cases 1–6 (ADD) =====================
 
@@ -834,6 +835,128 @@ def staff_reports():
     return render_template("staff_reports.html",
                            totals=totals, monthly=monthly,
                            from_date=from_date or "", to_date=to_date or "")
+
+# ===== Staff phone management ================================================
+@app.get("/staff/phones")
+def staff_phones():
+    guard = _require_staff()
+    if guard: 
+        return guard
+
+    staff_email = session.get("email")          # how staff log in in your app
+
+    c = conn.cursor()
+    # find this staff member's username first
+    c.execute("""
+        SELECT username 
+        FROM AirlineStaff 
+        WHERE email = %s
+        LIMIT 1
+    """, (staff_email,))
+    row = c.fetchone()
+    if not row:
+        c.close()
+        flash("Could not find staff username for this account.", "error")
+        return redirect(url_for("staff_home"))
+
+    staff_username = row["username"]
+
+    # now get all phone numbers for this username
+    c.execute("""
+        SELECT phone_number
+        FROM StaffPhoneNo
+        WHERE username = %s
+        ORDER BY phone_number
+    """, (staff_username,))
+    phones = c.fetchall()
+    c.close()
+
+    return render_template(
+        "staff_manage_phones.html",
+        phones=phones,
+        staff_username=staff_username
+    )
+
+
+@app.post("/staff/phones/add")
+def staff_phones_add():
+    guard = _require_staff()
+    if guard: 
+        return guard
+
+    staff_email = session.get("email")
+    new_phone   = request.form.get("phone_number", "").strip()
+
+    if not new_phone:
+        flash("Phone number cannot be empty.", "error")
+        return redirect(url_for("staff_manage_phones"))
+
+    c = conn.cursor()
+    # look up username from email
+    c.execute("SELECT username FROM AirlineStaff WHERE email = %s LIMIT 1",
+              (staff_email,))
+    row = c.fetchone()
+    if not row:
+        c.close()
+        flash("Could not find staff username for this account.", "error")
+        return redirect(url_for("staff_home"))
+
+    staff_username = row["username"]
+
+    try:
+        c.execute("""
+            INSERT INTO StaffPhoneNo (username, phone_number)
+            VALUES (%s, %s)
+        """, (staff_username, new_phone))
+        conn.commit()
+        flash("Phone number added.", "success")
+    except Exception as e:
+        conn.rollback()
+        # likely duplicate (same username + phone already exists) or constraint
+        flash(f"Error adding phone number: {e}", "error")
+    finally:
+        c.close()
+
+    return redirect(url_for("staff_manage_phones"))
+
+
+@app.post("/staff/phones/delete")
+def staff_phones_delete():
+    guard = _require_staff()
+    if guard: 
+        return guard
+
+    staff_email = session.get("email")
+    phone_to_delete = request.form.get("phone_number", "").strip()
+
+    if not phone_to_delete:
+        flash("No phone number selected.", "error")
+        return redirect(url_for("staff_manage_phones"))
+
+    c = conn.cursor()
+    # look up username from email
+    c.execute("SELECT username FROM AirlineStaff WHERE email = %s LIMIT 1",
+              (staff_email,))
+    row = c.fetchone()
+    if not row:
+        c.close()
+        flash("Could not find staff username for this account.", "error")
+        return redirect(url_for("staff_home"))
+
+    staff_username = row["username"]
+
+    c.execute("""
+        DELETE FROM StaffPhoneNo
+        WHERE username = %s AND phone_number = %s
+        LIMIT 1
+    """, (staff_username, phone_to_delete))
+    conn.commit()
+    c.close()
+
+    flash("Phone number removed.", "success")
+    return redirect(url_for("staff_manage_phones"))
+
+
 # ================= End Staff Features =======================================
 
 
