@@ -4,72 +4,134 @@
   <meta charset="utf-8" />
   <title>Staff Dashboard — Airline Reservation</title>
   <style>
-    :root { --bg:#f7f7fb; --card:#ffffff; --fg:#1c1c1c; --muted:#666; --border:#e6e6ea; --accent:#111; }
-    * { box-sizing:border-box }
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:var(--bg);color:var(--fg)}
-    header{display:flex;align-items:center;justify-content:space-between;background:var(--accent);color:#fff;padding:16px 20px}
-    header h1{margin:0;font-size:18px;display:flex;align-items:center;gap:10px}
-    header img.logo{height:28px;background:#fff;border-radius:6px;padding:3px}
-    header nav a{color:#fff;text-decoration:none;margin-left:14px}
-    main{max-width:980px;margin:28px auto;padding:0 16px}
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background: #f7f7fb;
+      color: #1c1c1c;
+    }
+    header {
+      padding: 18px 22px;
+      background: #111;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-right: 12px;
+    }
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
-    .card{display:block;padding:14px;border:1px solid var(--border);border-radius:12px;background:#fff;text-decoration:none;color:inherit}
+    main {
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 0 16px;
+    }
 
-    table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
-    th,td{border:1px solid var(--border);padding:8px;text-align:left;vertical-align:top}
-    th{background:#fafafa}
-    .muted{color:var(--muted)}
-    .actions a{font-size:.9em;text-decoration:none}
+    .top-buttons {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 25px;
+    }
+    .top-buttons a {
+      padding: 12px 22px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      text-decoration: none;
+      color: black;
+      display: inline-block;
+    }
+    .top-buttons a:hover {
+      background: #eee;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 380px auto;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .logo-box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-box img {
+      max-width: 90%;
+      height: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e6e6ea;
+      text-align: left;
+    }
+    th {
+      background: #f0f0f0;
+    }
+
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>
-      Airline Reservation
-      {% if session.get('airline_name') %}
-        {# Map airline name to filename like "air_canada.png", "jet_blue.png" (same rule as home.html) #}
-        {% set logo_name = (session.get('airline_name')
-                            |lower
-                            |replace(' ', '_')
-                            |replace('&','and')
-                            |replace('.','')
-                            |replace('-','')) ~ '.png' %}
-        <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}"
-             alt="{{ session.get('airline_name') }} logo">
-      {% endif %}
-    </h1>
-    <nav>
-      {% if session.get('display_name') %}
-        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('display_name') }}</span>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-      {% else %}
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('register') }}">Register</a>
-      {% endif %}
-    </nav>
-  </header>
 
-  <main>
-    <h2 style="margin:18px 6px 6px">
-      Staff Dashboard{% if session.get('airline_name') %} · {{ session.get('airline_name') }}{% endif %}
-    </h2>
+<header>
+  <h1 style="margin:0; font-size:18px;">Airline Reservation</h1>
+  <nav>
+    <span style="opacity:.85; margin-right:12px">Hi, {{ session.get('display_name') }}</span>
+    <a href="/">Home</a>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
 
-    <!-- All 7 staff features -->
-    <div class="grid">
-      <a class="card" href="{{ url_for('staff_view_flights') }}">View Flights</a>
-      <a class="card" href="{{ url_for('create_flight_form') }}">Create Flight</a>
-      <a class="card" href="{{ url_for('staff_manage_status') }}">Manage Flight Status</a>
-      <a class="card" href="{{ url_for('add_airplane_form') }}">Add Airplane</a>
-      <a class="card" href="{{ url_for('list_my_airplanes') }}">My Airplanes</a>
-      <a class="card" href="{{ url_for('staff_ratings') }}">View Flight Ratings</a>
-      <a class="card" href="{{ url_for('staff_reports') }}">Reports</a>
+<main>
+
+  <h2 style="margin: 10px 0 20px;">
+    Staff Dashboard · {{ session.get('airline_name') }}
+  </h2>
+
+  <!-- TOP BUTTONS -->
+  <div class="top-buttons">
+    <a href="/staff/view_flights">View Flights</a>
+    <a href="/create_flight">Create Flight</a>
+    <a href="/staff/manage_status">Manage Flight Status</a>
+    <a href="/staff/add_airplane">Add Airplane</a>
+    <a href="/staff/airplanes">My Airplanes</a>
+    <a href="/staff/ratings">View Flight Ratings</a>
+    <a href="/staff/reports">Reports</a>
+    <a href="/staff/phones">Manage Phone Numbers</a>
+  </div>
+
+  <!-- MAIN LAYOUT (Logo left, Flights right) -->
+  <div class="layout">
+
+    <!-- ✈️ LARGE AIRLINE LOGO (NO TEXT ABOVE) -->
+    <div class="logo-box">
+      <img 
+        src="{{ url_for('static', filename='airlines/' + session['airline_name'].lower().replace(' ', '_') + '.png') }}"
+        alt="{{ session['airline_name'] }} Logo">
     </div>
 
-    <h3>Upcoming Flights (My Airline)</h3>
-    {% if flights %}
+    <!-- UPCOMING FLIGHTS TABLE -->
+    <div>
+      <h3>Upcoming Flights (My Airline)</h3>
+
+      {% if flights %}
       <table>
         <tr>
           <th>Flight #</th>
@@ -77,25 +139,30 @@
           <th>To</th>
           <th>Departure</th>
           <th>Status</th>
-          <th class="actions">Actions</th>
+          <th>Actions</th>
         </tr>
         {% for f in flights %}
-          <tr>
-            <td>{{ f.flight_no }}</td>
-            <td>{{ f.src }}</td>
-            <td>{{ f.dst }}</td>
-            <td>{{ f.dep_datetime }}</td>
-            <td>{{ f.status }}</td>
-            <td class="actions">
-              <a href="{{ url_for('staff_manage_status') }}">Edit status</a> ·
-              <a href="{{ url_for('staff_view_flights') }}">View flights</a>
-            </td>
-          </tr>
+        <tr>
+          <td>{{ f.flight_no }}</td>
+          <td>{{ f.src }}</td>
+          <td>{{ f.dst }}</td>
+          <td>{{ f.dep_datetime }}</td>
+          <td>{{ f.status }}</td>
+          <td>
+            <a href="/staff/manage_status?from_date=&to_date=&dep_code=&arr_code=">Edit status</a> ·
+            <a href="/staff/view_flights">View flights</a>
+          </td>
+        </tr>
         {% endfor %}
       </table>
-    {% else %}
-      <p class="muted">No flights to display yet.</p>
-    {% endif %}
-  </main>
+      {% else %}
+        <p>No flights to display.</p>
+      {% endif %}
+    </div>
+
+  </div>
+
+</main>
+
 </body>
 </html>
