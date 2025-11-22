@@ -45,18 +45,16 @@
   <header>
     <h1>Airline Reservation</h1>
     <nav>
-    {% if session.get('display_name') %}
-        <span style="opacity:.85;margin-right:12px">Hi, {{ session.get('display_name') }}</span>
-        {% if session.get('role') == 'staff' %}
-          <a href="/staff_home" style="color:#fff;text-decoration:none;margin-right:12px">
-            Staff Dashboard
-          </a>
-        {% endif %}
-        <a href="/logout" style="color:#fff;text-decoration:none">Logout</a>
-    {% else %}
-        <a href="/login" style="color:#fff;text-decoration:none;margin-right:12px">Login</a>
-        <a href="/register" style="color:#fff;text-decoration:none">Register</a>
-    {% endif %}
+      {% if session.get('role') == 'staff' %}
+        <a href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% elif session.get('role') == 'customer' %}
+        <a href="{{ url_for('customer_home') }}">Customer Home</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+      {% endif %}
     </nav>
   </header>
 

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Complete Purchase — Airline Reservation</title>
+  <style>
+    :root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--muted:#666;--accent:#111;}
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg);color:var(--fg);
+    }
+    header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:16px 20px;background:var(--accent);color:#fff;
+    }
+    header a{color:#fff;text-decoration:none;margin-left:14px;font-size:14px;}
+    main{max-width:900px;margin:26px auto 32px;padding:0 16px;}
+    .card{
+      background:var(--card);border-radius:14px;border:1px solid var(--border);
+      padding:18px 20px;margin-bottom:16px;
+    }
+    h2{margin:0 0 10px;font-size:20px;}
+    h3{margin:0 0 6px;font-size:16px;}
+    .flight-summary{display:flex;justify-content:space-between;gap:10px;font-size:14px;}
+    .flight-main{display:flex;flex-direction:column;gap:2px;}
+    .flight-main .route-main{font-size:16px;font-weight:700;}
+    .flight-main .time{font-size:14px;font-weight:500;}
+    .flight-main .route{color:var(--muted);}
+    .price-big{font-size:18px;font-weight:700;}
+    .muted{color:var(--muted);font-size:13px;}
+    .form-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;}
+    .form-group{flex:1 1 200px;display:flex;flex-direction:column;font-size:14px;}
+    .form-group label{margin-bottom:4px;color:var(--muted);}
+    .form-group input, .form-group select{
+      padding:7px 9px;border-radius:8px;border:1px solid var(--border);font:inherit;
+    }
+    .btn{
+      padding:10px 16px;border-radius:999px;border:none;
+      font-size:15px;cursor:pointer;background:#111;color:#fff;
+      margin-top:14px;
+    }
+    .flash-box{margin-bottom:10px;}
+    .flash{
+      padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:14px;
+    }
+    .flash.error{background:#ffe5e5;border:1px solid #f5a3a3;}
+    .flash.success{background:#e4ffe8;border:1px solid #90d79b;}
+    .logo{
+      width:40px;height:40px;border-radius:50%;
+      object-fit:contain;border:1px solid var(--border);
+      background:#fff;margin-right:10px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div>Airline Reservation</div>
+  <nav>
+    <a href="{{ url_for('customer_home') }}">Dashboard</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </nav>
+</header>
+
+<main>
+
+  <div class="flash-box">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="card">
+    <h2>Review your trip</h2>
+
+    {% if trip == 'oneway' %}
+      {% set logo_name = (flight.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+      <div class="flight-summary">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <img class="logo" src="{{ url_for('static', filename='airlines/' ~ logo_name) }}"
+               alt="{{ flight.airline_name }}">
+          <div class="flight-main">
+            <span class="route-main">
+              {{ flight.dep_airport_code }} → {{ flight.arr_airport_code }}
+            </span>
+            <span class="time">
+              {{ flight.d_date }} {{ flight.d_time }} – {{ flight.a_date }} {{ flight.a_time }}
+            </span>
+            <span class="route">
+              {{ flight.airline_name }} · {{ flight.flight_no }}
+            </span>
+            <span class="muted">Duration: {{ flight.flight_duration }}</span>
+          </div>
+        </div>
+        <div>
+          <div class="price-big">${{ '%.2f'|format(total_price) }}</div>
+          <div class="muted">Total price</div>
+        </div>
+      </div>
+
+
+    {% elif trip == 'round' %}
+      <h3>Outbound</h3>
+      {% set out_logo = (outbound.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+      <div class="flight-summary" style="margin-bottom:18px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <img class="logo" src="{{ url_for('static', filename='airlines/' ~ out_logo) }}"
+               alt="{{ outbound.airline_name }}">
+          <div class="flight-main">
+            <span class="route-main">
+              {{ outbound.dep_airport_code }} → {{ outbound.arr_airport_code }}
+            </span>
+            <span class="time">
+              {{ outbound.d_date }} {{ outbound.d_time }} – {{ outbound.a_date }} {{ outbound.a_time }}
+            </span>
+            <span class="route">
+              {{ outbound.airline_name }} · {{ outbound.flight_no }}
+            </span>
+            <span class="muted">Duration: {{ outbound.flight_duration }}</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:6px;">Return</h3>
+      {% set in_logo = (inbound.airline_name|lower|replace(' ', '_')|replace('&','and')|replace('.','')|replace('-','')) ~ '.png' %}
+      <div class="flight-summary" style="margin-bottom:10px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <img class="logo" src="{{ url_for('static', filename='airlines/' ~ in_logo) }}"
+               alt="{{ inbound.airline_name }}">
+          <div class="flight-main">
+            <span class="route-main">
+              {{ inbound.dep_airport_code }} → {{ inbound.arr_airport_code }}
+            </span>
+            <span class="time">
+              {{ inbound.d_date }} {{ inbound.d_time }} – {{ inbound.a_date }} {{ inbound.a_time }}
+            </span>
+            <span class="route">
+              {{ inbound.airline_name }} · {{ inbound.flight_no }}
+            </span>
+            <span class="muted">Duration: {{ inbound.flight_duration }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:right;margin-top:8px;">
+        <div class="price-big">${{ '%.2f'|format(total_price) }}</div>
+        <div class="muted">Total price (outbound + return)</div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Payment details</h3>
+    <form method="post" action="{{ url_for('customer_confirm_purchase') }}">
+      <input type="hidden" name="trip" value="{{ trip }}">
+
+      {% if trip == 'oneway' %}
+        <input type="hidden" name="flight_no" value="{{ flight.flight_no }}">
+        <input type="hidden" name="airline_name" value="{{ flight.airline_name }}">
+        <input type="hidden" name="dep_date" value="{{ flight.d_date }}">
+        <input type="hidden" name="dep_time" value="{{ flight.d_time }}">
+        <input type="hidden" name="base_price" value="{{ flight.base_price }}">
+      {% else %}
+        <input type="hidden" name="out_flight_no" value="{{ outbound.flight_no }}">
+        <input type="hidden" name="out_airline_name" value="{{ outbound.airline_name }}">
+        <input type="hidden" name="out_dep_date" value="{{ outbound.d_date }}">
+        <input type="hidden" name="out_dep_time" value="{{ outbound.d_time }}">
+        <input type="hidden" name="out_base_price" value="{{ outbound.base_price }}">
+
+        <input type="hidden" name="ret_flight_no" value="{{ inbound.flight_no }}">
+        <input type="hidden" name="ret_airline_name" value="{{ inbound.airline_name }}">
+        <input type="hidden" name="ret_dep_date" value="{{ inbound.d_date }}">
+        <input type="hidden" name="ret_dep_time" value="{{ inbound.d_time }}">
+        <input type="hidden" name="ret_base_price" value="{{ inbound.base_price }}">
+      {% endif %}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="card_type">Card type</label>
+          <select id="card_type" name="card_type" required>
+            <option value="">Select</option>
+            <option value="credit">Credit card</option>
+            <option value="debit">Debit card</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="card_name">Cardholder name</label>
+          <input id="card_name" type="text" name="card_name"
+                 value="{{ session.get('display_name') or '' }}" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="card_num">Card number</label>
+          <input id="card_num" type="text" name="card_num"
+                 maxlength="19" placeholder="1111 2222 3333 4444" required>
+        </div>
+
+        <div class="form-group">
+          <label for="exp_date">Expiration (MM/YY)</label>
+          <input id="exp_date" type="text" name="exp_date"
+                 maxlength="5" inputmode="numeric"
+                 placeholder="12/30" required>
+        </div>
+
+        <div class="form-group">
+          <label for="cvc">CVC</label>
+          <input id="cvc" type="text" name="cvc" maxlength="4" inputmode="numeric" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn">Pay now</button>
+    </form>
+  </div>
+
+</main>
+
+<script>
+  // Auto-insert "/" in expiration field after MM
+  const expInput = document.getElementById('exp_date');
+  if (expInput) {
+    expInput.addEventListener('input', () => {
+      let digits = expInput.value.replace(/\D/g, '').slice(0, 4);
+      if (digits.length >= 3) {
+        expInput.value = digits.slice(0, 2) + '/' + digits.slice(2);
+      } else {
+        expInput.value = digits;
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

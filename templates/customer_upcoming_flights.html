@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Upcoming Flights — Airline Reservation</title>
+  <style>
+    :root {
+      --bg:#f7f7fb;
+      --card:#ffffff;
+      --fg:#1c1c1c;
+      --muted:#666;
+      --border:#e6e6ea;
+      --accent:#111;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#111;
+      color:#fff;
+      padding:16px 20px
+    }
+    header h1{margin:0;font-size:18px}
+    header nav a{color:#fff;text-decoration:none;margin-left:14px}
+    header nav .nav-greeting{
+      opacity:.85;
+      margin-right:12px;
+      font-size:16px;
+    }
+    main{max-width:980px;margin:28px auto;padding:0 16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:18px;
+    }
+    .muted{color:var(--muted)}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:12px;
+      background:#fff;
+    }
+    th,td{
+      border:1px solid var(--border);
+      padding:8px;
+      text-align:left;
+      font-size:14px;
+    }
+    th{
+      background:#f0f0f5;
+      font-weight:600;
+    }
+    .pill-status{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:12px;
+      font-weight:600;
+      text-transform:capitalize;
+    }
+    .pill-status.delayed{
+    border-color:#b00020;
+    color:#b00020;
+    background:#fdecef;
+    }
+    .pill-status.on-time{
+    border-color:#157f3b;
+    color:#157f3b;
+    background:#e9f7ec;
+    }
+    .top-actions{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      text-decoration:none;
+      color:inherit;
+      font-size:14px;
+    }
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Airline Reservation</h1>
+    <nav>
+      {% if session.get('display_name') %}
+        <span class="nav-greeting">Hi, {{ session.get('display_name') }}</span>
+        <a href="{{ url_for('customer_home') }}">Dashboard</a>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    <div class="top-actions">
+      <h2 style="margin:0;">Your Upcoming Flights</h2>
+      <div>
+        <a class="btn" href="{{ url_for('customer_home') }}">⬅ Back to Dashboard</a>
+      </div>
+    </div>
+
+    <section class="card">
+      {% if tickets and tickets|length > 0 %}
+        <table>
+          <thead>
+            <tr>
+              <th>Flight</th>
+              <th>Route</th>
+              <th>Departure</th>
+              <th>Status</th>
+              <th>Ticket ID</th>
+              <th>Purchased On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tickets %}
+              <tr>
+                <td>
+                  <strong>{{ t.flight_no }}</strong><br>
+                  <span class="muted">{{ t.airline_name }}</span>
+                </td>
+                <td>{{ t.src }} → {{ t.dst }}</td>
+                <td>{{ t.dep_disp }}</td>
+                <td>
+                  {% if t.status %}
+                    <span class="pill-status {{ t.status|lower|replace(' ','-') }}">
+                      {{ t.status }}
+                    </span>
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td>{{ t.ticket_id }}</td>
+                <td>{{ t.purchase_disp }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">You have no upcoming flights right now.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

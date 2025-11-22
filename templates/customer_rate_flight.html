@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Rate Flights — Airline Reservation</title>
+  <style>
+    :root {
+      --bg:#f7f7fb;
+      --card:#ffffff;
+      --fg:#1c1c1c;
+      --muted:#666;
+      --border:#e6e6ea;
+      --accent:#111;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#111;
+      color:#fff;
+      padding:16px 20px;
+    }
+    header h1{margin:0;font-size:18px}
+    header nav a{color:#fff;text-decoration:none;margin-left:14px}
+    header nav .nav-greeting{
+      opacity:.85;
+      margin-right:12px;
+      font-size:16px;
+    }
+    main{
+      max-width:980px;
+      margin:28px auto;
+      padding:0 16px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:18px;
+    }
+    .muted{color:var(--muted)}
+    .top-actions{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#fff;
+      text-decoration:none;
+      color:inherit;
+      font-size:14px;
+    }
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+    .flash-messages{
+      margin-bottom:16px;
+    }
+    .flash{
+      border-radius:10px;
+      padding:10px 12px;
+      margin-bottom:8px;
+      font-size:14px;
+    }
+    .flash.error{
+      background:#fdecef;
+      color:#b00020;
+      border:1px solid #f3c3cd;
+    }
+    .flash.success{
+      background:#e9f7ec;
+      color:#157f3b;
+      border:1px solid #bfe5c9;
+    }
+    .flash.info{
+      background:#eef3ff;
+      color:#21409a;
+      border:1px solid #c2cffc;
+    }
+    .rate-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:8px;
+    }
+    .rate-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px;
+      background:#fff;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .rate-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .rate-main{
+      display:flex;
+      flex-direction:column;
+    }
+    .rate-main strong{
+      font-size:15px;
+    }
+    .rate-meta{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .route-pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:12px;
+      font-weight:600;
+      margin-top:4px;
+    }
+    form.rate-form{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:4px;
+    }
+    .rate-form-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:center;
+    }
+    .rate-form-row label{
+      font-size:13px;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    select,input,textarea{
+      font:inherit;
+      border-radius:8px;
+      border:1px solid var(--border);
+      padding:6px 8px;
+      background:#fff;
+    }
+    select{
+      min-width:70px;
+    }
+    textarea{
+      width:100%;
+      resize:vertical;
+      min-height:60px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Airline Reservation</h1>
+    <nav>
+      {% if session.get('display_name') %}
+        <span class="nav-greeting">Hi, {{ session.get('display_name') }}</span>
+        <a href="{{ url_for('customer_home') }}">Dashboard</a>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    <div class="top-actions">
+      <h2 style="margin:0;">Rate Previous Flights</h2>
+      <div>
+        <a class="btn" href="{{ url_for('customer_home') }}">⬅ Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="flash-messages">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <section class="card">
+      {% if flights and flights|length > 0 %}
+        <p class="muted" style="margin-top:0;margin-bottom:10px;">
+          Select a rating from 1–5 and optionally leave a comment for each flight you've taken.
+        </p>
+
+        <div class="rate-list">
+          {% for f in flights %}
+            <article class="rate-card">
+              <div class="rate-header">
+                <div class="rate-main">
+                  <strong>{{ f.flight_no }}</strong>
+                  <span class="rate-meta">
+                    {{ f.airline_name }} · {{ f.dep_disp }}
+                  </span>
+                  <span class="route-pill">{{ f.src }} → {{ f.dst }}</span>
+                </div>
+              </div>
+
+              <form class="rate-form" action="{{ url_for('customer_rate_flights') }}" method="POST">
+                <input type="hidden" name="flight_no" value="{{ f.flight_no }}">
+                <input type="hidden" name="dep_datetime" value="{{ f.dep_dt_key }}">
+                <input type="hidden" name="airline_name" value="{{ f.airline_name }}">
+
+                <div class="rate-form-row">
+                  <label>
+                    Rating
+                    <select name="rating" required>
+                      <option value="" disabled selected>—</option>
+                      {% for n in range(1,6) %}
+                        <option value="{{ n }}">{{ n }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  <button class="btn primary" type="submit">Submit rating</button>
+                </div>
+
+                <label style="margin-top:4px;font-size:13px;font-weight:600;flex-direction:column;align-items:flex-start;">
+                  Comment (optional)
+                  <textarea name="comment" placeholder="Share your experience (optional)"></textarea>
+                </label>
+              </form>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted" style="margin:0;">
+          You currently have no unrated past flights.
+        </p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

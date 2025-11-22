@@ -48,6 +48,24 @@
     .flight .right{text-align:right;min-width:140px}
     .flight .price{font-weight:800;font-size:18px;margin-top:6px}
     .badge{display:inline-block;background:#e9f7ec;color:#157f3b;padding:6px 10px;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:8px}
+    .select-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:13px;
+      margin-top:8px;
+      padding:6px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      cursor:pointer;
+      background:#fff;
+    }
+    .select-btn:hover{
+      border-color:var(--accent);
+    }
+    .select-btn input{
+      margin:0;
+    }
   </style>
 </head>
 <body>
@@ -139,6 +157,11 @@
     {% endif %}
     <div id="search-results">
     {% if outbound is defined %}
+      {% if t == 'round' %}
+        <p class="muted" style="margin:8px 4px 0;">
+          Select exactly one outbound and one return flight before continuing to payment.
+        </p>
+      {% endif %}
       <div class="card" style="margin-top:16px;">
         <h3 style="margin:0 0 10px 0;">Outbound flights</h3>
         <div class="result-list">
@@ -166,11 +189,42 @@
                 <div class="airline">{{ r.airline_name }}{% if r.operated_by is defined %}, operated by {{ r.operated_by }}{% endif %} · <strong>{{ r.flight_no }}</strong></div>
               </div>
 
-              <div class="right">
+            <div class="right">
                 <div class="bigtime">{{ r.a_time }}</div>
                 <div class="tiny">{{ r.arr_airport_code }} · {{ r.a_date }}</div>
                 <div class="price">${{ '%.2f'|format(r.base_price) }}</div>
-              </div>
+
+                {# One-way → direct purchase button #}
+                {% if t != 'round' %}
+                  <form method="post" action="{{ url_for('customer_purchase_review') }}">
+                    <input type="hidden" name="trip" value="oneway">
+                    <input type="hidden" name="flight_no" value="{{ r.flight_no }}">
+                    <input type="hidden" name="airline_name" value="{{ r.airline_name }}">
+                    <input type="hidden" name="dep_airport_code" value="{{ r.dep_airport_code }}">
+                    <input type="hidden" name="arr_airport_code" value="{{ r.arr_airport_code }}">
+                    <input type="hidden" name="depart_date" value="{{ r.d_date }}">
+                    <input type="hidden" name="dep_time" value="{{ r.d_time }}">
+                    <input type="hidden" name="arrival_date" value="{{ r.a_date }}">
+                    <input type="hidden" name="arrival_time" value="{{ r.a_time }}">
+                    <input type="hidden" name="flight_duration" value="{{ r.flight_duration }}">
+                    <input type="hidden" name="base_price" value="{{ r.base_price }}">
+                    <button type="submit" class="btn primary" style="margin-top:8px;">
+                      Purchase
+                    </button>
+                  </form>
+
+                {# Round-trip → radio to select this outbound flight #}
+                {% else %}
+                  <label class="select-btn">
+                    <input type="radio"
+                           name="outbound_choice"
+                           form="roundtrip-form"
+                           {% if loop.first %}required{% endif %}
+                           value="{{ r.flight_no }}|{{ r.airline_name }}|{{ r.dep_airport_code }}|{{ r.arr_airport_code }}|{{ r.d_date }}|{{ r.d_time }}|{{ r.a_date }}|{{ r.a_time }}|{{ r.base_price }}|{{ r.flight_duration }}">
+                    Select
+                  </label>
+                {% endif %}
+            </div>
             </article>
           {% else %}
             <p class="muted">No flights found.</p>
@@ -209,19 +263,85 @@
                 <strong>{{ r.flight_no }}</strong>
                 </div>
             </div>
-
-            <div class="right">
+              <div class="right">
                 <div class="bigtime">{{ r.a_time }}</div>
                 <div class="tiny">{{ r.arr_airport_code }} · {{ r.a_date }}</div>
                 <div class="price">${{ '%.2f'|format(r.base_price) }}</div>
-            </div>
+
+                {# Round-trip → radio to select this return flight #}
+                {% if t == 'round' %}
+                  <label class="select-btn">
+                    <input type="radio"
+                           name="return_choice"
+                           form="roundtrip-form"
+                           {% if loop.first %}required{% endif %}
+                           value="{{ r.flight_no }}|{{ r.airline_name }}|{{ r.dep_airport_code }}|{{ r.arr_airport_code }}|{{ r.d_date }}|{{ r.d_time }}|{{ r.a_date }}|{{ r.a_time }}|{{ r.base_price }}|{{ r.flight_duration }}">
+                    Select
+                  </label>
+                {% endif %}
+              </div>
             </article>
         {% else %}
             <p class="muted">No return flights found.</p>
         {% endfor %}
         </div>
     {% endif %}
+
+    {# Shared form for round-trip purchase; radios above attach via form="roundtrip-form" #}
+    {% if t == 'round' and outbound is defined and inbound is defined and outbound and inbound %}
+      <form id="roundtrip-form"
+            method="post"
+            action="{{ url_for('customer_purchase_review') }}"
+            style="margin-top:16px;">
+        <input type="hidden" name="trip" value="round">
+        <button type="submit" class="btn primary">
+          Continue to payment
+        </button>
+      </form>
+    {% endif %}
     </div>
   </main>
+
+  <script>
+    // Toggle return date based on trip type
+    const form = document.getElementById('customer-search-form');
+    const retWrap = document.getElementById('return-date-wrap');
+    const tripRadios = form.querySelectorAll('input[name="trip"]');
+    const retInput = form.querySelector('input[name="return_date"]');
+
+    function syncReturn() {
+      const isRound = form.trip.value === 'round';
+      retWrap.style.display = isRound ? '' : 'none';
+      retInput.required = isRound;
+      if (!isRound) retInput.value = '';
+    }
+
+    tripRadios.forEach(r => r.addEventListener('change', syncReturn));
+    window.addEventListener('DOMContentLoaded', syncReturn);
+
+    // Clear button behavior: reset fields, hide return date, clear results & error
+    const clearBtn = document.getElementById('clear-btn');
+    clearBtn.addEventListener('click', () => {
+      const sourceSel = form.querySelector('select[name="source"]');
+      const destSel   = form.querySelector('select[name="destination"]');
+      const depInput  = form.querySelector('input[name="depart_date"]');
+      const retInput  = form.querySelector('input[name="return_date"]');
+
+      // reset fields
+      form.trip.value = 'oneway';
+      if (sourceSel) sourceSel.selectedIndex = 0;
+      if (destSel)   destSel.selectedIndex   = 0;
+      if (depInput)  depInput.value = '';
+      if (retInput)  retInput.value = '';
+      syncReturn();
+
+      // clear results & error and clean URL
+      const results = document.getElementById('search-results');
+      if (results) results.innerHTML = '';
+      const err = document.getElementById('error-block');
+      if (err) err.remove();
+      if (location.search) history.replaceState(null, '', location.pathname);
+    });
+  </script>
 </body>
 </html>

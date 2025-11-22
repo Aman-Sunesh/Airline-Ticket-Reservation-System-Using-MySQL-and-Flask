@@ -14,8 +14,11 @@ main{max-width:760px;margin:28px auto;padding:0 16px}
   <h2 style="margin:0 0 10px 0;">Comments · {{ flight_no }} · {{ dep_dt_key }}</h2>
   {% if reviews %}
     {% for r in reviews %}
-      <div class="comment"><div><strong>Rating:</strong> {{ r.rating }}/5</div>
-        <div class="small">By {{ r.customer_name }}</div>
+      <div class="comment">
+        <div><strong>Rating:</strong> {{ r.rating }}/5</div>
+        <div class="small">
+          By {{ r.customer_name }} ({{ r.customer_email }})
+        </div>
         <div>{{ r.comment or '—' }}</div>
       </div>
     {% endfor %}
