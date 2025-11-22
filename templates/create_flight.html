@@ -7,7 +7,9 @@
 :root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--accent);color:#fff}
+header h1{margin:0;font-size:18px}
+header nav a{color:#fff;text-decoration:none;margin-left:14px}
 main{max-width:800px;margin:28px auto;padding:0 16px}
 .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -20,9 +22,10 @@ input,select{padding:10px 12px;border:1px solid var(--border);border-radius:10px
 <body>
 
 <header>
-  <div>Airline Reservation</div>
+  <h1>Airline Reservation</h1>
   <nav>
-    <a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+    <a href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
   </nav>
 </header>
 

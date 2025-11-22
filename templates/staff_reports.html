@@ -3,7 +3,9 @@
 <style>
 :root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
-header{display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:16px 20px}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--accent);color:#fff}
+header h1{margin:0;font-size:18px}
+header nav a{color:#fff;text-decoration:none;margin-left:14px}
 main{max-width:980px;margin:28px auto;padding:0 16px}
 .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -15,8 +17,14 @@ table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
 th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:#fafafa}
 .bar{height:16px;background:#111;width:calc(var(--w, 0) * 1%)}
 </style></head><body>
-<header><div>Airline Reservation</div><nav><a style="color:#fff" href="{{ url_for('staff_home') }}">Staff Dashboard</a></nav></header>
-<main>
+<header>
+  <h1>Airline Reservation</h1>
+  <nav>
+    <a href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </nav>
+</header>
+  <main>
   <div class="card">
     <h2 style="margin:0 0 10px 0;">Reports — Tickets Sold</h2>
     <form class="grid" method="get" action="{{ url_for('staff_reports') }}">

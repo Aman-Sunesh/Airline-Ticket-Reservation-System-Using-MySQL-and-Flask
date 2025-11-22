@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>My Airplanes</title>
-    <!-- Optional: Bootstrap CDN for styling (matches your other pages) -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="utf-8">
+  <title>My Airplanes — Airline Reservation</title>
+  <style>
+    :root{--bg:#f7f7fb;--card:#fff;--fg:#1c1c1c;--border:#e6e6ea;--accent:#111}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--accent);color:#fff}
+    header h1{margin:0;font-size:18px}
+    header nav a{color:#fff;text-decoration:none;margin-left:14px}
+    main{max-width:980px;margin:28px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
+    th,td{border:1px solid var(--border);padding:8px;text-align:left}
+    th{background:#fafafa}
+    .btn{appearance:none;border:1px solid var(--border);background:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;text-decoration:none;color:var(--fg)}
+    .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">Airline Reservation</span>
-        <div class="d-flex">
-            <!-- Back to staff dashboard -->
-            <a href="{{ url_for('staff_home') }}" class="btn btn-outline-light me-2">
-                Staff Dashboard
-            </a>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">
-                Logout
-            </a>
-        </div>
-    </div>
-</nav>
+<header>
+  <h1>Airline Reservation</h1>
+  <nav>
+    <a href="{{ url_for('staff_home') }}">Staff Dashboard</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </nav>
+</header>
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>My Airplanes</h2>
-        <!-- Existing "Add Airplane" link -->
-        <a href="{{ url_for('add_airplane_form') }}" class="btn btn-primary">Add Airplane</a>
+<main>
+  <div class="card">
+    <div class="toolbar">
+      <h2 style="margin:0;">My Airplanes</h2>
+      <a href="{{ url_for('add_airplane_form') }}" class="btn primary">Add Airplane</a>
     </div>
-
-    <table class="table table-striped">
+    <table>
         <thead>
             <tr>
                 <th>ID</th>
@@ -51,7 +56,8 @@
         {% endfor %}
         </tbody>
     </table>
-</div>
+  </div>
+</main>
 
 </body>
 </html>
