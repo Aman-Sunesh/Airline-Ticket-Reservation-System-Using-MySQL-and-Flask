@@ -4,6 +4,7 @@ import pymysql.cursors
 from datetime import datetime, timedelta   
 from zoneinfo import ZoneInfo
 from types import SimpleNamespace
+from calendar import monthrange
 
 
 # Initialize the app from Flask
@@ -45,12 +46,14 @@ def _recompute_durations(rows):
             # Create departure datetime with timezone
             dep_date_str = r['d_date'] + " " + r['d_time']
             dep_dt = datetime.strptime(dep_date_str, "%B %d, %Y %I:%M %p")
-            dep_dt = dep_dt.replace(tzinfo=ZoneInfo(AIRPORT_TZ[r['dep_airport_code']]))
+            dep_tz = AIRPORT_TZ.get(r['dep_airport_code'], 'UTC')
+            dep_dt = dep_dt.replace(tzinfo=ZoneInfo(dep_tz))
 
             # Create arrival datetime with timezone
             arr_date_str = r['a_date'] + " " + r['a_time']
             arr_dt = datetime.strptime(arr_date_str, "%B %d, %Y %I:%M %p")
-            arr_dt = arr_dt.replace(tzinfo=ZoneInfo(AIRPORT_TZ[r['arr_airport_code']]))
+            arr_tz = AIRPORT_TZ.get(r['arr_airport_code'], 'UTC')
+            arr_dt = arr_dt.replace(tzinfo=ZoneInfo(arr_tz))
 
             # Convert both datetimes to UTC
             dep_utc = dep_dt.astimezone(ZoneInfo('UTC'))
@@ -887,18 +890,23 @@ def customer_confirm_purchase():
 
     cvc = cvc_raw
 
-    # Parse MM/YY into a date (1st of that month)
+    # Parse MM/YY and treat the card as valid through the end of that month
     try:
         month_str, year_str = exp_date_raw.split("/")
         month = int(month_str)
-        year = 2000 + int(year_str)  # "30" -> 2030
-        exp_date = datetime(year, month, 1).date()
+        year = 2000 + int(year_str)
+        # Compare by (year, month) only
+        today = datetime.today().date()
+        this_ym = (today.year, today.month)
+        exp_ym  = (year, month)
+        last_day = monthrange(year, month)[1]
+        exp_date = datetime(year, month, last_day).date()
     except Exception:
         flash("Invalid expiration date format. Please use MM/YY.", "error")
         return redirect(url_for("customer_purchase_review"))
 
-    # Reject expired cards
-    if exp_date < datetime.today().date():
+    # Reject if expired by year+month
+    if exp_ym < this_ym:
         flash("This card is expired. Please use a valid, non-expired card.", "error")
         return redirect(url_for("customer_purchase_review"))
     
@@ -1076,7 +1084,6 @@ def create_flight_form():
 def create_flight_submit():
     guard = _require_staff()
     if guard: return guard
-    a = session['airline_name']
 
     fno = request.form['flight_no'].strip().upper()
     a = session['airline_name']
@@ -1098,6 +1105,14 @@ def create_flight_submit():
         arr_dt_obj = datetime.strptime(f"{arr_date} {arr_time}", "%Y-%m-%d %H:%M")
     except ValueError:
         flash("Invalid departure or arrival date/time.", "error")
+        return redirect(url_for("create_flight_form"))
+    
+    if dep == arr:
+        flash("Departure and arrival airports must differ.", "error")
+        return redirect(url_for("create_flight_form"))
+    
+    if arr_dt_obj <= dep_dt_obj:
+        flash("Arrival time must be after departure time.", "error")
         return redirect(url_for("create_flight_form"))
 
     # Store as 'YYYY-MM-DD HH:MM:SS' for MySQL
@@ -1205,9 +1220,6 @@ def staff_update_status():
 @app.get("/staff/add_airplane")
 def add_airplane_form():
     guard = _require_staff()
-    if guard:
-        return guard
-
     if guard:
         return guard
 
