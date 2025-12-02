@@ -352,7 +352,7 @@ def search_flights():
                             DATE_FORMAT(arr_datetime, '%%l:%%i %%p') AS a_time,
                             TIME_FORMAT(TIMEDIFF(arr_datetime, dep_datetime), '%%Hh %%im') AS flight_duration,
                             base_price
-                    FROM flight
+                    FROM Flight
                     WHERE dep_airport_code = %s AND arr_airport_code = %s AND 
                             DATE(dep_datetime) = %s AND dep_datetime > NOW()
                     ORDER BY dep_datetime ASC; 
@@ -395,7 +395,7 @@ def search_flights():
                             DATE_FORMAT(arr_datetime, '%%l:%%i %%p') AS a_time,
                             TIME_FORMAT(TIMEDIFF(arr_datetime, dep_datetime), '%%Hh %%im') AS flight_duration,
                             base_price
-                    FROM flight
+                    FROM Flight
                     WHERE dep_airport_code = %s AND arr_airport_code = %s AND 
                             DATE(dep_datetime) = %s AND dep_datetime > NOW()
                     ORDER BY dep_datetime ASC; 
@@ -493,7 +493,7 @@ def staff_home():
             arr_airport_code AS dst,
             DATE_FORMAT(dep_datetime, '%%Y-%%m-%%d %%H:%%i') AS dep_datetime,
             status
-        FROM flight
+        FROM Flight
         WHERE airline_name = %s
           AND dep_datetime >= NOW()
           AND dep_datetime < DATE_ADD(NOW(), INTERVAL 30 DAY)
@@ -972,6 +972,7 @@ def customer_confirm_purchase():
                                        request.form["dep_date"], request.form["dep_time"])
         if not ok:
             conn.rollback()
+            cursor.close()
             return redirect(url_for("customer_purchase_review"))
 
     elif trip == "round":
@@ -983,6 +984,7 @@ def customer_confirm_purchase():
         
         if not (ok_out and ok_ret):
             conn.rollback()
+            cursor.close()
             return redirect(url_for("customer_purchase_review"))
 
     else:
@@ -1024,7 +1026,7 @@ def staff_view_flights():
                DATE_FORMAT(dep_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS dep_disp,
                DATE_FORMAT(arr_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS arr_disp,
                status, base_price
-        FROM flight
+        FROM Flight
         WHERE {' AND '.join(conds)}
         ORDER BY dep_datetime ASC
         LIMIT 500
@@ -1048,7 +1050,7 @@ def staff_flight_customers():
 
     c = conn.cursor()
     # safety: verify the flight belongs to this airline
-    c.execute("""SELECT 1 FROM flight
+    c.execute("""SELECT 1 FROM Flight
                  WHERE flight_no=%s AND dep_datetime=%s AND airline_name=%s""",
               (flight_no, dep_dt, airline))
     if not c.fetchone():
@@ -1057,7 +1059,7 @@ def staff_flight_customers():
 
     c.execute("""
       SELECT c.name, c.email, t.purchase_datetime
-      FROM ticket t JOIN customer c ON c.email=t.customer_email
+      FROM Ticket t JOIN Customer c ON c.email=t.customer_email
       WHERE t.flight_no=%s AND t.dep_datetime=%s AND t.airline_name=%s
       ORDER BY t.purchase_datetime
     """, (flight_no, dep_dt, airline))
@@ -1170,7 +1172,7 @@ def staff_manage_status():
                DATE_FORMAT(dep_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS dep_dt_disp,
                DATE_FORMAT(arr_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS arr_dt_disp,
                status, base_price
-        FROM flight
+        FROM Flight
         WHERE {' AND '.join(conditions)}
         ORDER BY dep_datetime ASC
         LIMIT 500
@@ -1201,7 +1203,7 @@ def staff_update_status():
 
     c = conn.cursor()
     # make sure it belongs to this airline
-    c.execute("""SELECT 1 FROM flight
+    c.execute("""SELECT 1 FROM Flight
                  WHERE flight_no=%s AND dep_datetime=%s AND airline_name=%s""",
               (flight_no, dep_dt, airline))
     if not c.fetchone():
@@ -1331,8 +1333,8 @@ def staff_ratings():
              DATE_FORMAT(f.dep_datetime,'%%M %%e, %%Y %%l:%%i %%p') AS dep_disp,
              f.dep_airport_code, f.arr_airport_code,
              ROUND(AVG(fr.rating),2) AS avg_rating, COUNT(fr.rating) AS num_reviews
-      FROM flight f
-      LEFT JOIN flightrating fr
+      FROM Flight f
+      LEFT JOIN FlightRating fr
         ON fr.flight_no=f.flight_no AND fr.dep_datetime=f.dep_datetime AND fr.airline_name=f.airline_name
       WHERE f.airline_name=%s
       GROUP BY f.flight_no, f.dep_datetime, f.dep_airport_code, f.arr_airport_code
@@ -1353,7 +1355,7 @@ def staff_ratings_detail():
     c = conn.cursor()
     c.execute("""
       SELECT fr.rating, fr.comment, fr.customer_email, c.name AS customer_name
-      FROM flightrating fr JOIN customer c ON c.email=fr.customer_email
+      FROM FlightRating fr JOIN Customer c ON c.email=fr.customer_email
       WHERE fr.flight_no=%s AND fr.dep_datetime=%s AND fr.airline_name=%s
       ORDER BY fr.rating DESC, c.name
     """,(flight_no, dep_dt, a))
@@ -1381,11 +1383,11 @@ def staff_reports():
     where = " AND ".join(clauses)
 
     c = conn.cursor()
-    c.execute(f"SELECT COUNT(*) AS total_tickets FROM ticket t WHERE {where}", params)
+    c.execute(f"SELECT COUNT(*) AS total_tickets FROM Ticket t WHERE {where}", params)
     totals = c.fetchone()
     c.execute(f"""
       SELECT DATE_FORMAT(t.purchase_datetime,'%%Y-%%m') AS ym, COUNT(*) AS cnt
-      FROM ticket t
+      FROM Ticket t
       WHERE {where}
       GROUP BY ym ORDER BY ym
     """, params)
