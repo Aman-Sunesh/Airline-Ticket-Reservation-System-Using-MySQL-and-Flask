@@ -1014,6 +1014,8 @@ def customer_confirm_purchase():
             return redirect(url_for("customer_purchase_review"))
 
     else:
+        conn.rollback()
+        cursor.close()
         flash("Invalid trip type.", "error")
         return redirect(url_for("customer_purchase_review"))
 
