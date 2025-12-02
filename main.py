@@ -955,6 +955,32 @@ def customer_confirm_purchase():
             flash(f"You’ve already purchased a ticket for flight {flight_no} that departs on {dep_datetime}.", "error")
             return False
 
+		# Capacity Check: Block if sold >= seat_capacity
+		cap_query = """SELECT a.seat_capacity AS capacity, COUNT(t.ticket_id) AS sold
+			           FROM Flight f
+			           JOIN Airplane a
+			           ON a.airplane_id = f.airplane_id
+			               AND a.airline_name = f.airline_name
+			           LEFT JOIN Ticket t
+			           ON t.flight_no = f.flight_no
+			               AND t.dep_datetime = f.dep_datetime
+			               AND t.airline_name = f.airline_name
+			           WHERE f.flight_no = %s
+			               AND f.dep_datetime = %s
+			               AND f.airline_name = %s
+			           GROUP BY a.seat_capacity
+        			"""
+        cursor.execute(cap_query, (flight_no, dep_datetime, airline_name))
+        cap_row = cursor.fetchone()
+		
+        if not cap_row:
+            flash("Could not verify seat capacity for this flight.", "error")
+            return False
+			
+        if cap_row["sold"] >= cap_row["capacity"]:
+            flash("Sorry, this flight is fully booked.", "error")
+            return False
+					   
         # Insert ticket
         insert_query = """INSERT INTO Ticket 
                           (flight_no, dep_datetime, airline_name, customer_email,
