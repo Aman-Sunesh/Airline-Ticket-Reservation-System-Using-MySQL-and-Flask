@@ -122,6 +122,15 @@ INSERT INTO Flight VALUES ('B61250','2025-12-10 07:30:00','Jet Blue','A320-JB2',
 INSERT INTO Flight VALUES ('DL1010','2025-12-10 17:45:00','Delta Air Lines','A220-DL3','JFK','BOS', '2025-12-10 19:10:00','on-time',128.00);
 INSERT INTO Flight VALUES ('AA211','2025-12-19 09:00:00','American Airlines','A321-AA1','BOS','JFK', '2025-12-19 10:20:00','on-time',119.00);
 INSERT INTO Flight VALUES ('UA208','2025-12-19 19:15:00','United Airlines','B738-UA1','BOS','JFK', '2025-12-19 20:35:00','on-time',121.00);
+INSERT INTO Flight VALUES ('B61251','2025-12-12 06:30:00','Jet Blue','A320-JB2','JFK','BOS','2025-12-12 07:50:00','on-time',129.00);
+INSERT INTO Flight VALUES ('B61252','2025-12-12 09:30:00','Jet Blue','E190-JB1','BOS','JFK','2025-12-12 10:45:00','on-time',119.00);
+INSERT INTO Flight VALUES ('B61253','2025-12-20 08:00:00','Jet Blue','E190-JB1','JFK','ORD','2025-12-20 09:30:00','on-time',155.00);
+INSERT INTO Flight VALUES ('B61254','2025-12-20 17:00:00','Jet Blue','E190-JB1','ORD','JFK','2025-12-20 18:30:00','on-time',155.00);
+INSERT INTO Flight VALUES ('B61255','2025-12-22 16:15:00','Jet Blue','A321-JB1','JFK','LAX','2025-12-22 20:00:00','on-time',340.00);
+INSERT INTO Flight VALUES ('B61256','2025-12-27 11:00:00','Jet Blue','A321-JB1','LAX','JFK','2025-12-27 19:00:00','on-time',345.00);
+INSERT INTO Flight VALUES ('B61257','2026-01-08 07:15:00','Jet Blue','A321-JB1','JFK','PVG','2026-01-09 00:05:00','on-time',780.00);
+INSERT INTO Flight VALUES ('B61258','2026-01-18 13:45:00','Jet Blue','A320-JB2','PVG','JFK','2026-01-18 20:25:00','on-time',770.00);
+
 
 
 -- Customer
@@ -153,8 +162,11 @@ VALUES ('B61234', '2025-11-10 09:00:00', 'Jet Blue', 'as18181@nyu.edu', 'credit'
        ('EY202',  '2025-12-10 01:30:00', 'Etihad Airways', 'ahmed.khan@gmail.com', 'debit',  '5105105105105106', 'Ahmed Khan', '2032-10-31', '2025-11-01 14:00:00'),
        ('EK202',  '2025-12-05 22:30:00', 'Emirates', 'li.wei@outlook.com', 'credit', '4007000000027', 'Li Wei', '2030-04-30', '2025-10-31 11:30:00'),
        ('AA100',  '2025-11-25 18:00:00', 'American Airlines', 'fatima.tamimi@outlook.com', 'debit',  '3566002020360505', 'Fatima Al Tamimi', '2032-06-30', '2025-10-27 13:40:00'),
-       ('UA123',  '2025-11-28 10:00:00', 'United Airlines', 'li.wei@outlook.com', 'credit', '6011111111111117', 'Li Wei', '2030-06-30', '2025-11-05 09:30:00');
-
+       ('UA123',  '2025-11-28 10:00:00', 'United Airlines', 'li.wei@outlook.com', 'credit', '6011111111111117', 'Li Wei', '2030-06-30', '2025-11-05 09:30:00'),
+       ('DL1300', '2026-01-04 07:45:00', 'Delta Air Lines', 'as18181@nyu.edu', 'credit', '4111111111111111', 'Aman Sunesh', '2029-12-31', '2025-11-05 09:00:00'),
+       ('B61242', '2026-01-06 07:00:00', 'Jet Blue', 'as18181@nyu.edu', 'credit', '4111111111111111', 'Aman Sunesh', '2029-12-31', '2025-11-06 10:30:00'),
+       ('UA203',  '2026-01-10 08:00:00', 'United Airlines', 'as18181@nyu.edu', 'credit', '4111111111111111', 'Aman Sunesh', '2029-12-31', '2025-11-07 11:15:00'),
+       ('AC101',  '2026-01-20 20:00:00', 'Air Canada', 'as18181@nyu.edu', 'credit', '4111111111111111', 'Aman Sunesh', '2029-12-31', '2025-11-08 14:45:00');
 
 -- FlightRating
 INSERT INTO FlightRating VALUES ('as18181@nyu.edu', 'EK202',  '2025-12-05 22:30:00', 'Emirates', 5, 'Smooth flight and friendly crew.');
@@ -166,4 +178,3 @@ INSERT INTO FlightRating VALUES ('maria.garcia@yahoo.com', 'EY101', '2025-11-20 
 INSERT INTO FlightRating VALUES ('li.wei@outlook.com', 'EK202', '2025-12-05 22:30:00', 'Emirates', 5, 'Excellent A380 experience.');
 INSERT INTO FlightRating VALUES ('fatima.tamimi@outlook.com', 'AA100', '2025-11-25 18:00:00', 'American Airlines', 4, 'Comfortable seats and helpful crew.');
 INSERT INTO FlightRating VALUES ('ad6647@nyu.edu', 'BA676', '2025-12-25 20:15:00', 'British Airways', 5, 'Great food, cabin, and special crew.');
-
