@@ -73,32 +73,22 @@ def _recompute_durations(rows):
             continue
 
 def _normalize_staff_phone(raw: str) -> str:
-    """
-    Normalize a staff phone number so formatting is consistent.
-    Assumes US-style numbers when there are 10 or 11 digits.
-    Examples:
-      '19175550221'    -> '+1-917-555-0221'
-      '9175550221'     -> '+1-917-555-0221'
-      '+1-718-555-1212' (already formatted) -> unchanged
-    """
-    raw = raw.strip()
-    digits = ''.join(c for c in raw if c.isdigit())
-
-    # If already contains '+' or '-' we assume user formatted it;
-    # we only auto-format plain digit strings.
-    if ('+' in raw or '-' in raw) or len(digits) not in (10, 11):
-        return raw
-
-    # 10-digit (US local) number -> assume +1
-    if len(digits) == 10:
-        return f"+1-{digits[0:3]}-{digits[3:6]}-{digits[6:]}"
-
-    # 11-digit starting with '1' -> treat first digit as country code
-    if len(digits) == 11 and digits[0] == '1':
-        return f"+1-{digits[1:4]}-{digits[4:7]}-{digits[7:]}"
-
-    # Fallback – shouldn't hit because of len check above
-    return raw
+     """
+     Normalize ANY staff phone number into canonical '+<digits>' form.
+     Removes spaces, hyphens, parentheses, etc., so both registration
+     and 'Manage Phone Numbers' treat the same number identically.
+     Examples:
+       '+1-837-112-5236' -> '+18371125236'
+       '18371125236'     -> '+18371125236'
+       '+919896803156'   -> '+919896803156'
+     """
+     raw = raw.strip()
+     # Keep only digits; we re-add a single leading '+' below
+     digits = ''.join(c for c in raw if c.isdigit())
+     if not digits:
+         # Fallback – invalid input; just return as-is so caller can handle
+         return raw
+     return f"+{digits}"
 
 def get_airport_codes():
 	cursor = conn.cursor()
@@ -187,7 +177,16 @@ def login():
 #Define route for register
 @app.route('/register')
 def register():
-	return render_template('register.html')
+    cursor = conn.cursor()
+    cursor.execute("SELECT airline_name FROM Airline ORDER BY airline_name")
+
+    airlines = []
+    rows = cursor.fetchall()
+    for row in rows:
+        airlines.append(row["airline_name"])
+
+    cursor.close()
+    return render_template('register.html', airlines=airlines)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -266,135 +265,281 @@ def loginAuth():
 #Authenticates the register
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
-	# If someone hits the URL directly, just show the form
-	if request.method == 'GET':
-		return render_template('register.html')
-	
-	error = None
+    # If someone hits the URL directly, always go through /register
+    # so the airlines list is loaded properly.
+    if request.method == 'GET':
+        return redirect(url_for('register'))
+        
+    user_type = request.form.get('user_type', 'customer')
 
-	# Grabs information from the forms
-	email = request.form['email'].lower().strip()
-	password = request.form['password']
-	name = request.form['name'].strip()
-	phone_number       = request.form['phone_number'].strip()
-	passport_number    = request.form['passport_number'].strip()
-	passport_country   = request.form['passport_country'].strip()
-	date_of_birth      = request.form['date_of_birth']  # 'YYYY-MM-DD'
-	passport_expiration= request.form['passport_expiration']  # 'YYYY-MM-DD'
+    # --------------------------- Staff registration ---------------------------
 
-	building_no = request.form.get('building_no')
-	if building_no:
-		building_no = building_no.strip()
-	else:
-		building_no = None
+    # Grabs information from the forms
+    if user_type == 'staff':
+        email  = (request.form.get('email') or '').lower().strip()
+        password = (request.form.get('password') or '')
+        username = (request.form.get('username') or '').strip()
+        first_name = (request.form.get('first_name') or '').strip()
+        last_name  = (request.form.get('last_name') or '').strip()
+        airline_name  = (request.form.get('airline_name') or '').strip()
+        date_of_birth = (request.form.get('date_of_birth') or '').strip()
+        # zero or more staff phone numbers from the dynamic list
+        raw_phones = request.form.getlist('staff_phone_numbers[]')
+        staff_phones = [p.strip() for p in raw_phones if p.strip()]
 
-	street = request.form.get('street')
-	if street:
-		street = street.strip()
-	else:
-		street = None
+        required = [
+            ('email',        email,        'Email'),
+            ('username',     username,     'Username'),
+            ('password',     password,     'Password'),
+            ('first_name',   first_name,   'First name'),
+            ('last_name',    last_name,    'Last name'),
+            ('airline_name', airline_name, 'Airline'),
+            ('date_of_birth',date_of_birth,'Date of birth'),
+        ]
+        for key, value, label in required:
+            if not value:
+                flash(f'{label} is required.', 'error')
+                return redirect(url_for('register'))
 
-	city = request.form.get('city')
-	if city:
-		city = city.strip()
-	else:
-		city = None
+        # Password rule: ≥8 chars, 1 uppercase, 1 digit
+        if (len(password) < 8 or
+                not any(c.isupper() for c in password) or
+                not any(c.isdigit() for c in password)):
+            flash("Password must be at least 8 characters, include one uppercase letter and one number.", "error")
+            return redirect(url_for('register'))
 
-	state = request.form.get('state')
-	if state:
-		state = state.strip()
-	else:
-		state = None
+        # Basic email / username validation
+        email_regex = r"[^@]+@[^@]+\.[^@]+"
+        if not re.match(email_regex, email):
+            flash("Please enter a valid email address.", "error")
+            return redirect(url_for('register'))
 
-	# Required fields (to ensure all the NOT NULL fields are filled by the user)
-	required = [
-		('email', email, 'Email'),
-		('name', name, 'Name'),
-		('password', password, 'Password'),
-		('phone_number', phone_number, 'Phone number'),
-		('passport_number', passport_number, 'Passport number'),
-		('passport_expiration', passport_expiration, 'Passport expiration'),
-		('passport_country', passport_country, 'Passport country'),
-		('date_of_birth', date_of_birth, 'Date of birth'),
-	]
+        if not re.match(r'^[A-Za-z0-9_]{3,50}$', username):
+            flash("Username must be 3–50 characters (letters, digits, underscore).", "error")
+            return redirect(url_for('register'))
 
-	for key, value, label in required:
-		if not value or not value.strip():
-			flash(f'{label} is required.', 'error')
-			return redirect(url_for('register'))
+        try:
+            # Parse as datetime, then convert to a pure date
+            dob = datetime.strptime(date_of_birth, '%Y-%m-%d').date()
+        except ValueError:
+            flash("Invalid date of birth format. Please use YYYY-MM-DD.", "error")
+            return redirect(url_for('register'))
 
-	if (len(password) < 8 or not any(c.isupper() for c in password) or not any(c.isdigit() for c in password)):
-		flash("Password must be at least 8 characters, include one uppercase letter and one number.", "error")
-		return redirect(url_for('register'))
-	
-	email_regex = r"[^@]+@[^@]+\.[^@]+"
-	if not re.match(email_regex, email):
-		flash("Please enter a valid email address.", "error")
-		return redirect(url_for('register'))
-	
-	# Minial check for phone numbers
-	digits_only = ''
-	for c in phone_number:
-		if c.isdigit():
-			digits_only += c
+        # Extra DOB checks for staff: must be in the past and at least 18 years old
+        today = datetime.today().date()
+        if dob > today:
+            flash("Date of birth must be in the past.", "error")
+            return redirect(url_for('register'))
 
-	if len(digits_only) < 7:
-		flash("Phone number seems too short — include at least 7 digits.", "error")
-		return redirect(url_for('register'))
-	if len(phone_number) > 20:
-		flash("Phone number must be 20 characters or fewer.", "error")
-		return redirect(url_for('register'))
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        if age < 18:
+            flash("Staff must be at least 18 years old.", "error")
+            return redirect(url_for('register'))
 
-	if not re.match(r'^[A-Z0-9]{5,20}$', passport_number, re.IGNORECASE):
-		flash("Please enter a valid passport number (5–20 alphanumeric characters).", "error")
-		return redirect(url_for('register'))	
+        cursor = conn.cursor()
 
-	try:
-		dob = datetime.strptime(date_of_birth, '%Y-%m-%d')
-		exp = datetime.strptime(passport_expiration, '%Y-%m-%d')
-		if dob >= exp:
-			flash("Passport expiration must be after date of birth.", "error")
-			return redirect(url_for('register'))
-	except ValueError:
-		flash("Invalid date format. Please use YYYY-MM-DD.", "error")
-		return redirect(url_for('register'))
+        # Airline must already exist
+        cursor.execute(
+            "SELECT 1 FROM Airline WHERE airline_name = %s LIMIT 1",
+            (airline_name,)
+        )
 
-	#cursor used to send queries
-	cursor = conn.cursor()
+        if not cursor.fetchone():
+            cursor.close()
+            flash("Selected airline does not exist. Please choose a valid airline.", "error")
+            return redirect(url_for('register'))
 
-	#executes query
-	query = """SELECT 1 FROM Customer WHERE email = %s
-			UNION
-			SELECT 1 FROM AirlineStaff WHERE email = %s
-			LIMIT 1
-			"""
-	cursor.execute(query, (email, email))
+        # Email must be unique across Customer + AirlineStaff; username unique in AirlineStaff
+        query = """
+            SELECT 1 FROM Customer WHERE email=%s
+            UNION
+            SELECT 1 FROM AirlineStaff WHERE email=%s OR username=%s
+            LIMIT 1
+        """
+        cursor.execute(query, (email, email, username))
+        exists = cursor.fetchone()
 
-	#stores the results in a variable
-	data = cursor.fetchone()
-	cursor.close()
+        if exists:
+            cursor.close()
+            flash("A user with this email or username already exists.", "error")
+            return redirect(url_for('register'))
 
-	if(data):
-		#If the previous query returns data, then user exists
-		flash("This user already exists", "error")
-		return redirect(url_for('register'))
-	
-	else:
-		ins_query = """INSERT INTO Customer 
-				 (email, name, password, building_no, street, city, state,
-				  phone_number, passport_number, passport_expiration, 
-				  passport_country, date_of_birth)
-				 VALUES (%s, %s, MD5(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s)
-			  """
-		
-		cursor = conn.cursor()
-		cursor.execute(ins_query, (email, name, password, building_no, street, city, state,
-				       phone_number, passport_number, passport_expiration, 
-				       passport_country, date_of_birth))
-		conn.commit()
-		cursor.close()
+        try:
+            # Insert staff row
+            ins_staff = """
+                INSERT INTO AirlineStaff
+                    (username, password, airline_name, first_name, last_name, date_of_birth, email)
+                VALUES (%s, MD5(%s), %s, %s, %s, %s, %s)
+            """
+            cursor.execute(
+                ins_staff,
+                (username, password, airline_name, first_name, last_name, date_of_birth, email)
+            )
 
-	return redirect(url_for('home'))
+            # Optional initial phone numbers (0..N)
+            for phone in staff_phones:
+                # allow "+", digits, hyphens from frontend
+                digits_only = phone.lstrip("+").replace("-", "")
+
+                # enforce digits-only
+                if not digits_only.isdigit():
+                    conn.rollback()
+                    cursor.close()
+                    flash("Phone numbers must contain digits only. Include country code, e.g., 16464565870.", "error")
+                    return redirect(url_for("register"))
+    
+                if len(digits_only) < 7 or len(phone) > 20:
+                    conn.rollback()
+                    cursor.close()
+                    flash("Each staff phone number must be 7–20 digits (plus + or -).", "error")
+                    return redirect(url_for('register'))
+
+                # Normalize for DB
+                phone_number = _normalize_staff_phone(phone)
+
+                cursor.execute(
+                    "INSERT INTO StaffPhoneNo (username, phone_number) VALUES (%s, %s)",
+                    (username, phone_number),
+                )
+
+            conn.commit()
+
+        except Exception:
+            conn.rollback()
+            cursor.close()
+            flash("Error creating staff account. Please try again.", "error")
+            return redirect(url_for('register'))
+
+        cursor.close()
+        flash("Staff account created. You can now log in.", "success")
+
+        return redirect(url_for('login'))
+
+
+    # -------------------------- Customer registration ------------------------
+
+    # Grabs information from the forms
+    email = request.form['email'].lower().strip()
+    password = request.form['password']
+    name = request.form['name'].strip()
+    phone_number        = request.form['phone_number'].strip()
+    passport_number     = request.form['passport_number'].strip()
+    passport_country    = request.form['passport_country'].strip()
+    date_of_birth       = request.form['date_of_birth']  # 'YYYY-MM-DD'
+    passport_expiration = request.form['passport_expiration']  # 'YYYY-MM-DD'
+
+    building_no = request.form.get('building_no')
+    if building_no:
+        building_no = building_no.strip()
+    else:
+        building_no = None
+
+    street = request.form.get('street')
+    if street:
+        street = street.strip()
+    else:
+        street = None
+
+    city = request.form.get('city')
+    if city:
+        city = city.strip()
+    else:
+        city = None
+
+    state = request.form.get('state')
+    if state:
+        state = state.strip()
+    else:
+        state = None
+
+    # Required fields (to ensure all the NOT NULL fields are filled by the user)
+    required = [
+        ('email', email, 'Email'),
+        ('name', name, 'Name'),
+        ('password', password, 'Password'),
+        ('phone_number', phone_number, 'Phone number'),
+        ('passport_number', passport_number, 'Passport number'),
+        ('passport_expiration', passport_expiration, 'Passport expiration'),
+        ('passport_country', passport_country, 'Passport country'),
+        ('date_of_birth', date_of_birth, 'Date of birth'),
+    ]
+
+    for key, value, label in required:
+        if not value or not value.strip():
+            flash(f'{label} is required.', 'error')
+            return redirect(url_for('register'))
+
+    if (len(password) < 8 or not any(c.isupper() for c in password) or not any(c.isdigit() for c in password)):  # Same as staff
+        flash("Password must be at least 8 characters, include one uppercase letter and one number.", "error")
+        return redirect(url_for('register'))
+
+    email_regex = r"[^@]+@[^@]+\.[^@]+"
+    if not re.match(email_regex, email):
+        flash("Please enter a valid email address.", "error")
+        return redirect(url_for('register'))
+
+    # Minial check for phone numbers
+    digits_only = ''
+    for c in phone_number:
+        if c.isdigit():
+            digits_only += c
+
+    if len(digits_only) < 7:
+        flash("Phone number seems too short — include at least 7 digits.", "error")
+        return redirect(url_for('register'))
+    if len(phone_number) > 20:
+        flash("Phone number must be 20 characters or fewer.", "error")
+        return redirect(url_for('register'))
+
+    if not re.match(r'^[A-Z0-9]{5,20}$', passport_number, re.IGNORECASE):
+        flash("Please enter a valid passport number (5–20 alphanumeric characters).", "error")
+        return redirect(url_for('register'))	
+
+    try:
+        dob = datetime.strptime(date_of_birth, '%Y-%m-%d')
+        exp = datetime.strptime(passport_expiration, '%Y-%m-%d')
+        if dob >= exp:
+            flash("Passport expiration must be after date of birth.", "error")
+            return redirect(url_for('register'))
+    except ValueError:
+        flash("Invalid date format. Please use YYYY-MM-DD.", "error")
+        return redirect(url_for('register'))
+
+    #cursor used to send queries
+    cursor = conn.cursor()
+
+    #executes query
+    query = """SELECT 1 FROM Customer WHERE email = %s
+            UNION
+            SELECT 1 FROM AirlineStaff WHERE email = %s
+            LIMIT 1
+            """
+    cursor.execute(query, (email, email))
+
+    #stores the results in a variable
+    data = cursor.fetchone()
+
+    if(data):
+        #If the previous query returns data, then user exists
+        cursor.close()
+        flash("This user already exists", "error")
+        return redirect(url_for('register'))
+
+    else:
+        ins_query = """INSERT INTO Customer 
+                    (email, name, password, building_no, street, city, state,
+                    phone_number, passport_number, passport_expiration, 
+                    passport_country, date_of_birth)
+                    VALUES (%s, %s, MD5(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+        
+        cursor.execute(ins_query, (email, name, password, building_no, street, city, state,
+                        phone_number, passport_number, passport_expiration, 
+                        passport_country, date_of_birth))
+        conn.commit()
+        cursor.close()
+
+    return redirect(url_for('login'))
 
 
 # =========================== Customer Features ================================
@@ -1482,11 +1627,27 @@ def staff_add_phone():
         flash("Phone number must be 20 characters or fewer.", "error")
         return redirect(url_for("staff_manage_phones"))
     
-    # Normalize so formatting is consistent (e.g. +1-718-555-1212)
+    # Normalize into canonical '+<digits>' so duplicates are detected
+    # even if previously stored with hyphens or different formatting.
     phone_number = _normalize_staff_phone(raw_phone)
 
     c = conn.cursor()
     try:
+        # Check for an existing number for this user using canonical form.
+        # We normalize existing rows as well so '+1-837-112-5236' and
+        # '+18371125236' are treated as the same phone number.
+        c.execute(
+            "SELECT phone_number FROM StaffPhoneNo WHERE username=%s",
+            (username,),
+        )
+
+        existing = c.fetchall()
+        for row in existing:
+            if _normalize_staff_phone(row["phone_number"]) == phone_number:
+                flash("This phone number is already on your account.", "error")
+                return redirect(url_for("staff_manage_phones"))
+
+        # If not duplicate, insert the canonical form
         c.execute(
             "INSERT INTO StaffPhoneNo (username, phone_number) VALUES (%s, %s)",
             (username, phone_number),
