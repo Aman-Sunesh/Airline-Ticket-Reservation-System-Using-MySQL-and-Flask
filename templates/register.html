@@ -34,6 +34,21 @@
     .btn.primary{ background:#111; color:#fff; border-color:#111; }
     .btn.primary:link,.btn.primary:visited{ color:#fff; }
     .actions .btn{ flex:0 0 200px; }                                        
+    .flash-box{ margin-bottom:10px; }
+    .flash{
+      padding:8px 10px;
+      border-radius:8px;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+    .flash.error{
+      background:#ffe5e5;
+      border:1px solid #f5a3a3;
+    }
+    .flash.success{
+      background:#e4ffe8;
+      border:1px solid #90d79b;
+    }
     .alert { padding:10px 12px; border-radius:10px; background:#fff4f4; border:1px solid #ffd7d7; color:#8a1c1c; }
     .muted { color:var(--muted); font-size:13px; }
   </style>
@@ -43,6 +58,15 @@
 
   <main>
     <div class="card">
+      <div class="flash-box">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div class="flash {{ category }}">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
       <p class="muted">Fields marked with <span style="color:#c62828">*</span> are required.</p>
 
       <form action="/registerAuth" method="POST" autocomplete="on" id="register-form">
