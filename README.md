@@ -170,9 +170,9 @@ Open this URL in your browser to access the home page.
 ## Screenshots 
 
 ```md
-![Home Page](screenshots/home.png)
-![Customer Dashboard](screenshots/customer-dashboard.png)
-![Staff Dashboard](screenshots/staff-dashboard.png)
+![Home Page](./screenshots/home.png)  
+![Customer Dashboard](./screenshots/customer-dashboard.png)  
+![Staff Dashboard](./screenshots/staff-dashboard.png)
 ```
 
 ---
