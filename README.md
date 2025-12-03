@@ -42,7 +42,8 @@ It supports customer bookings, airline staff operations, and basic analytics suc
 
 ### Timezone‑Aware Scheduling
 
-Flight departure and arrival datetimes are stored in the database and converted using IANA timezones (e.g., `America/New_York`, `Asia/Dubai`).  
+Flight departure and arrival datetimes are stored in the database and converted using IANA timezones (e.g., `America/New_York`, `Asia/Dubai`).
+
 The application computes and displays **flight durations** in a user‑friendly format on search and booking pages.
 
 ---
