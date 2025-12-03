@@ -63,6 +63,7 @@ The application computes and displays **flight durations** in a user‑friendly 
 Airline-Ticket-Reservation-System-Using-MySQL-and-Flask/
 │
 ├── db/                     # SQL schema and sample data files
+├── screenshots              
 ├── static/
 │   └── airlines/           # Static assets (e.g., airline logos)
 ├── templates/              # Flask HTML/Jinja templates
@@ -166,14 +167,12 @@ Open this URL in your browser to access the home page.
 
 ---
 
-## Screenshots (Optional)
-
-You can add screenshots of your pages here once you export them, for example:
+## Screenshots 
 
 ```md
-![Home Page](docs/screenshots/home.png)
-![Customer Dashboard](docs/screenshots/customer-dashboard.png)
-![Staff Dashboard](docs/screenshots/staff-dashboard.png)
+![Home Page](screenshots/home.png)
+![Customer Dashboard](screenshots/customer-dashboard.png)
+![Staff Dashboard](screenshots/staff-dashboard.png)
 ```
 
 ---
