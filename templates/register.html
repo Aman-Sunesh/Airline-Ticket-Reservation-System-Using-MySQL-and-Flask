@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Airline Reservation — Customer Registration</title>
+  <title>Airline Reservation — Registration</title>
   <style>
     :root { --bg:#f7f7fb; --card:#ffffff; --fg:#1c1c1c; --muted:#666; --border:#e6e6ea; --accent:#111; --danger:#c62828; }
     * { box-sizing:border-box }
@@ -19,7 +19,7 @@
     label { display:flex; flex-direction:column; gap:6px; font-weight:600; }
     label > span { font-size:14px; }
     label.required > span::after { content:" *"; color:var(--danger); }
-    input { padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:14px; }
+    input, select { padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:14px; }
     .hint { font-size:12px; color:var(--muted); margin-top:-6px; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center; }
     .btn{
@@ -51,13 +51,77 @@
     }
     .alert { padding:10px 12px; border-radius:10px; background:#fff4f4; border:1px solid #ffd7d7; color:#8a1c1c; }
     .muted { color:var(--muted); font-size:13px; }
+    .role-tabs{
+      display:inline-flex;
+      padding:4px;
+      border-radius:999px;
+      background:#f0f0f5;
+      margin-bottom:14px;
+    }
+    .role-tabs button{
+      border:none;
+      background:transparent;
+      padding:6px 14px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .role-tabs button.active{
+      background:#111;
+      color:#fff;
+    }
+    .role-section{ margin-top:8px; }
+    .phone-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:4px;
+    }
+    .phone-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .phone-row input{
+      flex:1;
+    }
+    .phone-remove{
+      border:none;
+      background:#eee;
+      border-radius:999px;
+      width:28px;
+      height:28px;
+      cursor:pointer;
+      font-size:16px;
+      line-height:1;
+    }
+    .phone-remove:hover{
+      background:#ddd;
+    }
+    .phone-add{
+      margin-top:6px;
+      border:none;
+      background:transparent;
+      color:#0077cc;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+      padding:0;
+    }
   </style>
 </head>
 <body>
-  <header><h1>Airline Reservation — Customer Registration</h1></header>
+  <header><h1>Airline Reservation — Registration</h1></header>
 
   <main>
     <div class="card">
+      <div class="role-tabs">
+        <button type="button" class="tab-btn active" data-role-tab="customer">Customer</button>
+        <button type="button" class="tab-btn" data-role-tab="staff">Airline Staff</button>
+      </div>
+
       <div class="flash-box">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -70,98 +134,204 @@
       <p class="muted">Fields marked with <span style="color:#c62828">*</span> are required.</p>
 
       <form action="/registerAuth" method="POST" autocomplete="on" id="register-form">
-        <!-- Account -->
-        <fieldset>
-          <legend>Account</legend>
-          <div class="grid">
-            <label class="required">
-              <span>Email</span>
-              <input type="email" name="email" required autocomplete="email" maxlength="255">
-            </label>
+        <input type="hidden" name="user_type" id="user_type" value="customer">
 
-            <label class="required">
-              <span>Password</span>
-              <input
-                type="password"
-                name="password"
-                required
-                autocomplete="new-password"
-                pattern="(?=.*[A-Z])(?=.*\d).{8,}"
-                title="At least 8 characters, with one uppercase letter and one number."
-                maxlength="255">
-              <div class="hint">Min 8 chars, include an uppercase letter and a number.</div>
-            </label>
+        <!-- ==================== Customer registration ==================== -->
+        <div class="role-section" data-role="customer">
+          <!-- Account -->
+          <fieldset>
+            <legend>Customer Account</legend>
+            <div class="grid">
+              <label class="required">
+                <span>Email</span>
+                <input type="email" name="email" required autocomplete="email" maxlength="255">
+              </label>
 
-            <label class="required">
-              <span>Full Name</span>
-              <input type="text" name="name" required maxlength="100" autocomplete="name">
-            </label>
-          </div>
-        </fieldset>
+              <label class="required">
+                <span>Password</span>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  autocomplete="new-password"
+                  pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+                  title="At least 8 characters, with one uppercase letter and one number."
+                  maxlength="255">
+                <div class="hint">Min 8 chars, include an uppercase letter and a number.</div>
+              </label>
 
-        <!-- Contact & Address -->
-        <fieldset>
-          <legend>Contact & Address</legend>
-          <div class="grid">
-            <label>
-              <span>Building No.</span>
-              <input type="text" name="building_no" maxlength="20">
-            </label>
+              <label class="required">
+                <span>Full Name</span>
+                <input type="text" name="name" required maxlength="100" autocomplete="name">
+              </label>
+            </div>
+          </fieldset>
 
-            <label>
-              <span>Street</span>
-              <input type="text" name="street" maxlength="200" autocomplete="address-line1">
-            </label>
+          <!-- Contact & Address -->
+          <fieldset>
+            <legend>Contact & Address</legend>
+            <div class="grid">
+              <label>
+                <span>Building No.</span>
+                <input type="text" name="building_no" maxlength="20">
+              </label>
 
-            <label>
-              <span>City</span>
-              <input type="text" name="city" maxlength="200" autocomplete="address-level2">
-            </label>
+              <label>
+                <span>Street</span>
+                <input type="text" name="street" maxlength="200" autocomplete="address-line1">
+              </label>
 
-            <label>
-              <span>State/Region</span>
-              <input type="text" name="state" maxlength="200" autocomplete="address-level1">
-            </label>
+              <label>
+                <span>City</span>
+                <input type="text" name="city" maxlength="200" autocomplete="address-level2">
+              </label>
 
-            <label class="required">
-              <span>Phone Number</span>
-              <input
-                type="tel"
-                name="phone_number"
-                required
-                pattern="[\d\+\-\s]{7,20}"
-                title="Digits, spaces, + or - (7–20 characters)"
-                maxlength="20"
-                autocomplete="tel">
-            </label>
-          </div>
-        </fieldset>
+              <label>
+                <span>State/Region</span>
+                <input type="text" name="state" maxlength="200" autocomplete="address-level1">
+              </label>
+              <label class="required">
+                <span>Phone Number</span>
+                <input
+                  type="tel"
+                  name="phone_number"
+                  required
+                  value="+"
+                  pattern="\+\d{7,19}"
+                  title="Start with +, then 7–19 digits (include country code, e.g. +16464565870)"
+                  maxlength="20"
+                  autocomplete="tel"
+                  oninput="
+                    // Always keep leading '+', allow only digits after it
+                    if (this.value[0] !== '+') {
+                      this.value = '+' + this.value.replace(/[^0-9]/g, '');
+                    } else {
+                      this.value = '+' + this.value.slice(1).replace(/[^0-9]/g, '');
+                    }
+                  ">
+                <div class="hint">Start with + and enter country code and number, e.g. +16464565870.</div>
+              </label>
+            </div>
+          </fieldset>
 
-        <!-- Passport -->
-        <fieldset>
-          <legend>Passport</legend>
-          <div class="grid">
-            <label class="required">
-              <span>Passport Number</span>
-              <input type="text" name="passport_number" required maxlength="20" autocomplete="off">
-            </label>
+          <!-- Passport -->
+          <fieldset>
+            <legend>Passport</legend>
+            <div class="grid">
+              <label class="required">
+                <span>Passport Number</span>
+                <input type="text" name="passport_number" required maxlength="20" autocomplete="off">
+              </label>
 
-            <label class="required">
-              <span>Passport Country</span>
-              <input type="text" name="passport_country" required maxlength="60" autocomplete="country-name">
-            </label>
+              <label class="required">
+                <span>Passport Country</span>
+                <input type="text" name="passport_country" required maxlength="60" autocomplete="country-name">
+              </label>
 
-            <label class="required">
-              <span>Date of Birth</span>
-              <input type="date" name="date_of_birth" required id="dob">
-            </label>
+              <label class="required">
+                <span>Date of Birth</span>
+                <input type="date" name="date_of_birth" required id="dob">
+              </label>
 
-            <label class="required">
-              <span>Passport Expiration</span>
-              <input type="date" name="passport_expiration" required id="pexp">
-            </label>
-          </div>
-        </fieldset>
+              <label class="required">
+                <span>Passport Expiration</span>
+                <input type="date" name="passport_expiration" required id="pexp">
+              </label>
+            </div>
+          </fieldset>
+        </div><!-- /customer section -->
+
+        <!-- ====================== Staff registration ===================== -->
+        <div class="role-section" data-role="staff" style="display:none">
+          <!-- Staff Account -->
+          <fieldset>
+            <legend>Staff Account</legend>
+            <div class="grid">
+              <label class="required">
+                <span>Email</span>
+                <input type="email" name="email" autocomplete="email" maxlength="255">
+              </label>
+
+              <label class="required">
+                <span>Password</span>
+                <input
+                  type="password"
+                  name="password"
+                  autocomplete="new-password"
+                  pattern="(?=.*[A-Z])(?=.*\d).{8,}"
+                  title="At least 8 characters, with one uppercase letter and one number."
+                  maxlength="255">
+                <div class="hint">Min 8 chars, include an uppercase letter and a number.</div>
+              </label>
+
+              <label class="required">
+                <span>Username</span>
+                <input
+                  type="text"
+                  name="username"
+                  maxlength="50"
+                  pattern="^[A-Za-z0-9_]{3,50}$"
+                  title="3–50 characters: letters, digits, underscore.">
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- Staff Details -->
+          <fieldset>
+            <legend>Staff Details</legend>
+            <div class="grid">
+              <label class="required">
+                <span>First Name</span>
+                <input type="text" name="first_name" maxlength="50">
+              </label>
+
+              <label class="required">
+                <span>Last Name</span>
+                <input type="text" name="last_name" maxlength="50">
+              </label>
+
+              <label class="required">
+                <span>Airline</span>
+                <select name="airline_name" required>
+                  <option value="">Select airline…</option>
+                  {% for a in airlines %}
+                    <option value="{{ a }}">{{ a }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+
+              <label class="required">
+                <span>Date of Birth</span>
+                <input type="date" name="date_of_birth" id="staff_dob">
+              </label>
+              <label>
+                <span>Phone Numbers</span>
+                <div class="phone-list" id="staff-phone-list">
+                  <div class="phone-row">
+                    <input
+                      type="tel"
+                      name="staff_phone_numbers[]"
+                      required
+                      value="+"
+                      pattern="\+\d{7,19}"
+                      title="Start with +, then 7–19 digits (e.g. +16464565870)"
+                      maxlength="20"
+                      oninput="
+                        if (this.value[0] !== '+') {
+                          this.value = '+' + this.value.replace(/[^0-9]/g, '');
+                        } else {
+                          this.value = '+' + this.value.slice(1).replace(/[^0-9]/g, '');
+                        }
+                      ">
+                    <button type="button" class="phone-remove" aria-label="Remove phone">&times;</button>
+                  </div>
+                </div>
+                <button type="button" class="phone-add" id="add-staff-phone">+ Add phone</button>
+                <p class="hint">You can add more phone numbers later from your staff dashboard.</p>
+              </label>
+            </div>
+          </fieldset>
+        </div><!-- /staff section -->
 
         <div class="actions">
           <button class="btn primary" type="submit">Create Account</button>
@@ -171,21 +341,118 @@
     </div>
   </main>
 
+
   <script>
-    // Keep client-side aligned with DB check: passport_expiration > date_of_birth
+    // Keep client-side aligned with DB check: passport_expiration > date_of_birth (customer)
     const dob = document.getElementById('dob');
     const exp = document.getElementById('pexp');
     function syncMin() {
-      if (dob.value) {
+      if (dob && exp && dob.value) {
         const d = new Date(dob.value);
         d.setDate(d.getDate() + 1); // strictly greater than DOB
-        exp.min = d.toISOString().slice(0,10);
-      } else {
+        exp.min = d.toISOString().slice(0, 10);
+      } else if (exp) {
         exp.min = '';
       }
     }
-    dob.addEventListener('change', syncMin);
-    window.addEventListener('DOMContentLoaded', syncMin);
+
+    // Role switch (customer vs staff)
+    function initRoleSwitch() {
+      const userTypeInput = document.getElementById('user_type');
+      const tabs = document.querySelectorAll('.tab-btn');
+      const sections = document.querySelectorAll('.role-section');
+
+      function setRole(role) {
+        if (userTypeInput) {
+          userTypeInput.value = role;
+        }
+        tabs.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.roleTab === role);
+        });
+        sections.forEach(sec => {
+          const isActive = sec.dataset.role === role;
+          sec.style.display = isActive ? 'block' : 'none';
+          sec.querySelectorAll('input, select').forEach(el => {
+            el.disabled = !isActive;
+          });
+        });
+      }
+
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => setRole(btn.dataset.roleTab));
+      });
+
+      // Initial state
+      setRole(userTypeInput && userTypeInput.value === 'staff' ? 'staff' : 'customer');
+    }
+
+    // Dynamic staff phone list (+ / ×)
+    function initStaffPhoneDynamic() {
+      const list = document.getElementById('staff-phone-list');
+      const addBtn = document.getElementById('add-staff-phone');
+      if (!list || !addBtn) return;
+
+      function refreshRemoveButtons() {
+        const rows = list.querySelectorAll('.phone-row');
+        rows.forEach(row => {
+          const btn = row.querySelector('.phone-remove');
+          if (!btn) return;
+          // hide remove button if only one row left
+          btn.style.display = (rows.length === 1) ? 'none' : '';
+        });
+      }
+
+      addBtn.addEventListener('click', function () {
+        const rows = list.querySelectorAll('.phone-row');
+        let newRow;
+        if (rows.length > 0) {
+          // clone first row and clear its input
+          newRow = rows[0].cloneNode(true);
+          const input = newRow.querySelector('input');
+          if (input) {
+            input.value = '+';
+          }
+        } else {
+          // fallback (shouldn't normally happen)
+          newRow = document.createElement('div');
+          newRow.className = 'phone-row';
+          newRow.innerHTML =
+            '<input type="tel" name="staff_phone_numbers[]" ' +
+            'pattern="[\\d\\+\\-\\s]{7,20}" ' +
+            'title="Digits, spaces, + or - (7–20 characters)" ' +
+            'maxlength="20">' +
+            '<button type="button" class="phone-remove" aria-label="Remove phone">&times;</button>';
+        }
+        list.appendChild(newRow);
+        refreshRemoveButtons();
+      });
+
+      list.addEventListener('click', function (ev) {
+        const target = ev.target;
+        if (target && target.classList.contains('phone-remove')) {
+          const rows = list.querySelectorAll('.phone-row');
+          if (rows.length > 1) {
+            const row = target.closest('.phone-row');
+            if (row) {
+              row.remove();
+              refreshRemoveButtons();
+            }
+          }
+        }
+      });
+
+      // initial state
+      refreshRemoveButtons();
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      if (dob) {
+        dob.addEventListener('change', syncMin);
+      }
+      syncMin();
+      initRoleSwitch();
+      initStaffPhoneDynamic();
+    });
   </script>
 </body>
 </html>
