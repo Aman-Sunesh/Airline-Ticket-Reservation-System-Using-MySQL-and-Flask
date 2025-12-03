@@ -31,12 +31,37 @@
       width:100%;
     }
     .actions .btn{ flex:0 0 200px; }  
-	.error{color:#b00020}
+
+    /* Flash message styles (match Complete Purchase page) */
+    .flash-box{margin-bottom:10px;}
+    .flash{
+      padding:8px 10px;
+      border-radius:8px;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+    .flash.error{
+      background:#ffe5e5;
+      border:1px solid #f5a3a3;
+    }
+    .flash.success{
+      background:#e4ffe8;
+      border:1px solid #90d79b;
+    }
   </style>
 </head>
 <body>
   <header><div>Airline Reservation</div></header>
   <main><div class="card">
+  <div class="flash-box">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 <form action="/loginAuth" method="POST">
 	<input type="text" name = "email" placeholder="email" required/> </br>
 	<input type="password" name = "password" placeholder="password" required/></br>
@@ -45,5 +70,6 @@
 	  <a class="btn primary" href="/" role="button">Home</a>
 	</div>
 </form>
+</div></main>
 </body>
 </html>
