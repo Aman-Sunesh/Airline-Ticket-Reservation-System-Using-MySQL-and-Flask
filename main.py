@@ -100,6 +100,85 @@ def _normalize_staff_phone(raw: str) -> str:
     # Fallback – shouldn't hit because of len check above
     return raw
 
+def get_airport_codes():
+	cursor = conn.cursor()
+	cursor.execute("SELECT code FROM airport ORDER BY code")
+	rows = cursor.fetchall()
+	cursor.close()
+	return [row["code"] for row in rows]
+
+def _require_staff():
+    """Redirect to login unless the session is a staff user with an airline."""
+    if session.get('role') != 'staff' or not session.get('airline_name'):
+        return redirect(url_for('login'))
+    return None
+
+def _require_customer():
+    """Redirect to login unless the session is a logged-in customer."""
+    if session.get("role") != "customer" or not session.get("email"):
+        return redirect(url_for("login"))
+    return None
+
+def _parse_date(s):
+    try:
+        return datetime.strptime(s, "%Y-%m-%d").date()
+    except Exception:
+        return None
+    
+
+# Landing page: main public search view
+@app.route("/")
+@app.route("/home")
+def home():
+    airports = get_airport_codes()
+    return render_template(
+        "home.html",
+        username=session.get("email"),
+        role=session.get("role"),
+        airports=airports,
+    )
+
+@app.route('/customer_home')
+def customer_home():
+    guard = _require_customer()
+    if guard:
+        return guard
+
+    airports = get_airport_codes()
+    return render_template('customer_home.html', airports=airports)
+
+@app.route('/staff_home')
+def staff_home():
+    # protect staff dashboard; bounce non-staff to login
+    guard = _require_staff()
+    if guard:
+        return guard
+
+    airline = session.get('airline_name')
+    c = conn.cursor()
+    c.execute("""
+        SELECT
+            flight_no,
+            dep_airport_code AS src,
+            arr_airport_code AS dst,
+            DATE_FORMAT(dep_datetime, '%%Y-%%m-%%d %%H:%%i') AS dep_datetime,
+            status
+        FROM Flight
+        WHERE airline_name = %s
+          AND dep_datetime >= NOW()
+          AND dep_datetime < DATE_ADD(NOW(), INTERVAL 30 DAY)
+        ORDER BY dep_datetime ASC
+        LIMIT 50
+    """, (airline,))
+    flights = c.fetchall()
+    c.close()
+
+    return render_template('staff_home.html', flights=flights)
+
+
+
+# =========================== Authentication ================================
+
 #Define route for login
 @app.route('/login')
 def login():
@@ -318,6 +397,8 @@ def registerAuth():
 	return redirect(url_for('home'))
 
 
+# =========================== Customer Features ================================
+
 @app.route('/search_flights', methods=['GET'])
 def search_flights():
     # Grabs information from the forms
@@ -428,83 +509,6 @@ def search_flights():
             inbound=inbound,
             airports=airports,
         )
-
-def get_airport_codes():
-	cursor = conn.cursor()
-	cursor.execute("SELECT code FROM airport ORDER BY code")
-	rows = cursor.fetchall()
-	cursor.close()
-	return [row["code"] for row in rows]
-
-def _require_staff():
-    """Redirect to login unless the session is a staff user with an airline."""
-    if session.get('role') != 'staff' or not session.get('airline_name'):
-        return redirect(url_for('login'))
-    return None
-
-def _require_customer():
-    """Redirect to login unless the session is a logged-in customer."""
-    if session.get("role") != "customer" or not session.get("email"):
-        return redirect(url_for("login"))
-    return None
-
-def _parse_date(s):
-    try:
-        return datetime.strptime(s, "%Y-%m-%d").date()
-    except Exception:
-        return None
-# ============================================================================
-
-
-# Landing page: main public search view
-@app.route("/")
-@app.route("/home")
-def home():
-    airports = get_airport_codes()
-    return render_template(
-        "home.html",
-        username=session.get("email"),
-        role=session.get("role"),
-        airports=airports,
-    )
-
-@app.route('/customer_home')
-def customer_home():
-    guard = _require_customer()
-    if guard:
-        return guard
-
-    airports = get_airport_codes()
-    return render_template('customer_home.html', airports=airports)
-
-@app.route('/staff_home')
-def staff_home():
-    # protect staff dashboard; bounce non-staff to login
-    guard = _require_staff()
-    if guard:
-        return guard
-
-    airline = session.get('airline_name')
-    c = conn.cursor()
-    c.execute("""
-        SELECT
-            flight_no,
-            dep_airport_code AS src,
-            arr_airport_code AS dst,
-            DATE_FORMAT(dep_datetime, '%%Y-%%m-%%d %%H:%%i') AS dep_datetime,
-            status
-        FROM Flight
-        WHERE airline_name = %s
-          AND dep_datetime >= NOW()
-          AND dep_datetime < DATE_ADD(NOW(), INTERVAL 30 DAY)
-        ORDER BY dep_datetime ASC
-        LIMIT 50
-    """, (airline,))
-    flights = c.fetchall()
-    c.close()
-
-    return render_template('staff_home.html', flights=flights)
-
 
 
 @app.get("/customer/upcoming_flights")
@@ -679,7 +683,6 @@ def customer_rate_flights():
                            AND dep_datetime=%s AND airline_name=%s
                     LIMIT 1
                   """
-
 
     cursor.execute(query_check, (email, flight_no, dep_datetime, airline_name))
     exists = cursor.fetchone()
@@ -1023,6 +1026,12 @@ def customer_confirm_purchase():
     cursor.close()
     flash("Thank you, your purchase has been recorded.", "success")
     return redirect(url_for("customer_purchase_review"))
+
+
+# ===================== End Customer Features ================================
+
+
+# ======================== Staff Features ====================================
 
 # 1) View flights (filters; default next 30 days)
 @app.get("/staff/view_flights")
@@ -1526,8 +1535,8 @@ def logout():
 		
 app.secret_key = 'some key that you will never guess'
 
-#Run the app on localhost port 5000
-#debug = True -> you don't have to restart flask
-#for changes to go through, TURN OFF FOR PRODUCTION
+# Run the app on localhost port 5000
+# debug = True -> you don't have to restart flask
+# for changes to go through, TURN OFF FOR PRODUCTION
 if __name__ == "__main__":
 	app.run('127.0.0.1', 5000, debug = True)
