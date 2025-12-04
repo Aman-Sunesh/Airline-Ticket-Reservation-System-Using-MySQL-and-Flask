@@ -15,14 +15,13 @@ main{max-width:800px;margin:28px auto;padding:0 16px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
 label{display:flex;flex-direction:column;font-weight:600;gap:6px}
 input,select{padding:10px;border:1px solid var(--border);border-radius:10px}
-.flash-box{margin-bottom:10px;}
-.flash{
-  padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:14px;
-}
-.flash.error{background:#ffe5e5;border:1px solid #f5a3a3;}
-.flash.success{background:#e4ffe8;border:1px solid #90d79b;}
 .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);cursor:pointer}
 .btn.primary{background:#111;color:#fff;border-color:#111}
+.flash-container{margin:16px 0;}
+.flash{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:14px;border:1px solid var(--border);background:#fff;}
+.flash-error{border-color:#b00020;background:#fdecef;color:#b00020;}
+.flash-success{border-color:#157f3b;background:#e9f7ec;color:#157f3b;}
+.flash-info{border-color:#1e88e5;background:#e3f2fd;color:#1e88e5;}
 </style>
 </head>
 <body>
@@ -36,9 +35,17 @@ input,select{padding:10px;border:1px solid var(--border);border-radius:10px}
 </header>
 
 <main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
   <div class="card">
     <h2>Add Airplane</h2>
-
     <form method="post" action="{{ url_for('add_airplane_submit') }}">
       <div class="grid">
 

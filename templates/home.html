@@ -39,6 +39,11 @@
     .flight .right{text-align:right;min-width:140px}
     .flight .price{font-weight:800;font-size:18px;margin-top:6px}
     .badge{display:inline-block;background:#e9f7ec;color:#157f3b;padding:6px 10px;border-radius:10px;font-size:12px;font-weight:600;margin-bottom:8px}
+    .flash-container{margin:16px 0;}
+    .flash{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:14px;border:1px solid var(--border);background:#fff;}
+    .flash-error{border-color:#b00020;background:#fdecef;color:#b00020;}
+    .flash-success{border-color:#157f3b;background:#e9f7ec;color:#157f3b;}
+    .flash-info{border-color:#1e88e5;background:#e3f2fd;color:#1e88e5;}
   </style>
 </head>
 <body>
@@ -59,6 +64,15 @@
   </header>
 
   <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     <div class="card">
       <h2 style="margin-top:0;">Search Flights</h2>
       <form action="/search_flights" method="GET" id="public-search-form">

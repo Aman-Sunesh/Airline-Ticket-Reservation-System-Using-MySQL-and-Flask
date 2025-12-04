@@ -10,7 +10,15 @@ main{max-width:800px;margin:28px auto;padding:0 16px}
 .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px}
 table{width:100%;border-collapse:collapse;margin-top:12px;background:#fff}
 th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:#fafafa}
-</style></head><body>
+.flash-container{margin:16px 0;}
+.flash{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:14px;border:1px solid var(--border);background:#fff;}
+.flash-error{border-color:#b00020;background:#fdecef;color:#b00020;}
+.flash-success{border-color:#157f3b;background:#e9f7ec;color:#157f3b;}
+.flash-info{border-color:#1e88e5;background:#e3f2fd;color:#1e88e5;}
+</style>
+
+</head>
+<body>
 <header>
   <h1>Airline Reservation</h1>
   <nav>
@@ -18,7 +26,17 @@ th,td{border:1px solid var(--border);padding:8px;text-align:left} th{background:
     <a href="{{ url_for('logout') }}">Logout</a>
   </nav>
 </header>
-<main><div class="card">
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  <div class="card">
   <h2 style="margin:0 0 8px 0;">Customers · {{ flight_no }} · {{ dep_dt_key }}</h2>
   {% if customers %}
     <table><tr><th>Name</th><th>Email</th><th>Purchased</th></tr>

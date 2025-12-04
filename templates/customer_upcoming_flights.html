@@ -99,6 +99,11 @@
       color:#fff;
       border-color:#111;
     }
+    .flash-container{margin:16px 0;}
+    .flash{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:14px;border:1px solid var(--border);background:#fff;}
+    .flash-error{border-color:#b00020;background:#fdecef;color:#b00020;}
+    .flash-success{border-color:#157f3b;background:#e9f7ec;color:#157f3b;}
+    .flash-info{border-color:#1e88e5;background:#e3f2fd;color:#1e88e5;}
   </style>
 </head>
 <body>
@@ -118,6 +123,15 @@
   </header>
 
   <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     <div class="top-actions">
       <h2 style="margin:0;">Your Upcoming Flights</h2>
       <div>
