@@ -4,7 +4,7 @@ CREATE TABLE Airline(
   );
 
 CREATE TABLE Airport(
-  code CHAR(3) NOT NULL,
+  code VARCHAR(4) NOT NULL,
   city VARCHAR(200) NOT NULL,
   country VARCHAR(60) NOT NULL,
   airport_type ENUM('domestic','international','both') NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE Flight(
   dep_datetime DATETIME NOT NULL,
   airline_name VARCHAR(50) NOT NULL,
   airplane_id VARCHAR(20) NOT NULL,
-  dep_airport_code CHAR(3) NOT NULL,
-  arr_airport_code CHAR(3) NOT NULL,
+  dep_airport_code VARCHAR(4) NOT NULL,
+  arr_airport_code VARCHAR(4) NOT NULL,
   arr_datetime DATETIME NOT NULL,
   status ENUM('on-time','delayed') NOT NULL DEFAULT 'on-time',
   base_price DECIMAL(10,2) NOT NULL CHECK (base_price >= 0),
@@ -116,7 +116,7 @@ CREATE TABLE Ticket(
   exp_date DATE NOT NULL,
   purchase_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT chk_card_not_expired CHECK (exp_date >= DATE(purchase_datetime)),
-  CONSTRAINT chk_purchase_before_dep CHECK (purchase_datetime <= dep_datetime),z
+  CONSTRAINT chk_purchase_before_dep CHECK (purchase_datetime <= dep_datetime),
   PRIMARY KEY (ticket_id),
   FOREIGN KEY (flight_no, dep_datetime, airline_name)
     REFERENCES Flight(flight_no, dep_datetime, airline_name)
